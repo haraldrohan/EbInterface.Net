@@ -13,7 +13,7 @@ Frühe Entwicklungsphase (`0.1.0-alpha`). Die API kann sich noch ändern.
 | Versionserkennung | ✅ | ✅ | ✅ | ✅ | geplant |
 | Schema-Prüfung (XSD) | ✅ | ✅ | ✅ | ✅ | geplant |
 | Regeln von e-Rechnung.gv.at | ✅ | ✅ | ✅ | ✅ | geplant |
-| Lesen in ein Modell | – | geplant | geplant | geplant | geplant |
+| Lesen in ein Modell | ✅ | ✅ | ✅ | ✅ | geplant |
 | Schreiben | – | – | geplant | geplant | geplant |
 | Versions-Upgrade | geplant | geplant | geplant | – | – |
 
@@ -45,6 +45,23 @@ foreach (var message in result.Messages)
 
 `IsValid` ist `true`, solange es keine Fehler gibt. Warnungen stehen zusätzlich in `Messages`, zum Beispiel für
 Felder, die e-Rechnung.gv.at nicht auswertet. Alle Codes und Regeln stehen in [docs/pruefregeln.md](docs/pruefregeln.md).
+
+### Rechnung lesen
+
+```csharp
+using EbInterface;
+using EbInterface.Model;
+
+EbInvoice invoice = EbInterfaceReader.ReadFile("rechnung.xml");   // 4.3, 5.0, 6.0 oder 6.1
+
+Console.WriteLine($"{invoice.InvoiceNumber} vom {invoice.InvoiceDate:d}: {invoice.PayableAmount} {invoice.Currency}");
+foreach (LineItem line in invoice.AllLineItems)
+    Console.WriteLine($"  {line.Quantity} {line.Unit} {line.Descriptions[0]} à {line.UnitPrice} ({line.TaxPercent} % USt)");
+```
+
+Gelesen werden nur schemagültige Dokumente; andernfalls kommt eine `EbInterfaceReadException` mit allen Meldungen
+in `Validation`. Alle Versionen landen im selben Modell. Noch nicht abgebildet sind Erweiterungen (`Extension`),
+Signaturen, `AdditionalInformation`, `Classification`, Fremdwährungsangaben und `PresentationDetails`.
 
 Die Bibliothek prüft vollständig lokal und baut keine Netzwerkverbindungen auf. Den endgültigen Nachweis liefert der
 [Test-Upload von e-Rechnung.gv.at](https://test.erechnung.gv.at/go/test_upload).

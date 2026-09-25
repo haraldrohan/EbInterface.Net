@@ -5,6 +5,7 @@ Alle wesentlichen Änderungen werden hier dokumentiert. Das Format folgt [Keep a
 ## [Unveröffentlicht]
 
 ### Hinzugefügt
+- Rechnungsmodell `EbInvoice` (Namespace `EbInterface.Model`) und `EbInterfaceReader` zum Lesen von 4.3, 5.0, 6.0 und 6.1 in dasselbe Modell; ungültige Dokumente lösen `EbInterfaceReadException` mit dem Prüfergebnis aus.
 - Erkennung der ebInterface-Version 4.3, 5.0, 6.0 und 6.1 anhand des Namespace; ältere Versionen werden als nicht unterstützt gemeldet (`VER-03`).
 - Schema-Prüfung (XSD) für 4.3, 5.0, 6.0 und 6.1 mit Zeilen- und Spaltenangabe. Verständliche deutsche Meldungen mit eigenen Codes (`XSD-02` bis `XSD-08`) für fehlende oder falsch platzierte Elemente, ungültige Werte (mit Grund, z. B. zulässige Werte oder Datumsformat) und Attribute – unabhängig von Sprache und Version der .NET-Laufzeit.
 - Sicheres Einlesen ohne DTD-Verarbeitung (XXE-Schutz).

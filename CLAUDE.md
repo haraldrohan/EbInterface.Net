@@ -52,8 +52,11 @@ Eine Stufe läuft nur, wenn die vorige ohne Fehler bestanden wurde:
 Fehlercodes sind **stabil**: ein Code je Regel, nach Veröffentlichung keine Bedeutungsänderung, keine Wiederverwendung.
 Meldungen auf **Deutsch**, verständlich, mit Hinweis zur Behebung, mit Zeile/Spalte wo möglich.
 
-Geplantes Modell: versionsspezifische Klassen je Schema-Version + gemeinsames Rechnungsmodell `EbInvoice` + Mapper
-in beide Richtungen. Versions-Upgrade = einlesen in Modell, ausgeben in neuer Version.
+**Modell:** ein gemeinsames Rechnungsmodell `EbInvoice` (Namespace `EbInterface.Model`) für alle Versionen – keine
+generierten Klassen je Schema-Version. `Internal/InvoiceMapper` übersetzt direkt aus dem XML (5.0–6.1 haben dieselben
+Elementnamen; 4.3 weicht bei Steuer `VATRate`/`TaxExemption`/`VAT/VATItem`, Kontakt in der Adresse und qualifizierten
+Attributen ab). Der Reader liest nur schemagültige Dokumente. Klassen mit `get; set;` und vorbelegten Listen
+(netstandard2.0, VB.NET). Versions-Upgrade = einlesen ins Modell, ausgeben in neuer Version.
 
 ## Regeln von e-Rechnung.gv.at
 
@@ -125,11 +128,11 @@ dotnet pack src/EbInterface.Net -c Release -o artifacts
 
 ## Stand und nächste Schritte
 
-Erledigt: Versionserkennung (4.3–6.1), XSD-Prüfung 4.3–6.1 mit deutschen Meldungen, XXE-Schutz, Prüfprofile, Regeln von
+Erledigt: Versionserkennung (4.3–6.1), XSD-Prüfung 4.3–6.1 mit deutschen Meldungen, Rechnungsmodell und Reader 4.3–6.1, XXE-Schutz, Prüfprofile, Regeln von
 e-Rechnung.gv.at (ERB-01 bis ERB-38) samt Abgleich mit dem Test-Upload, eigene Testdaten, CI.
 
 Als Nächstes, in dieser Reihenfolge:
-1. Rechnungsmodell `EbInvoice` + Reader für 4.3/5.0/6.0/6.1.
-2. Rechenprüfungen wie im Portal (AF-0025 Zeilenbetrag, AF-0026 Zeilen-Brutto, AF-0028 `PayableAmount`) auf Basis
+1. Rechenprüfungen wie im Portal (AF-0025 Zeilenbetrag, AF-0026 Zeilen-Brutto, AF-0028 `PayableAmount`) auf Basis
    des Modells, inklusive Auf-/Abschlägen und Rundungstoleranz – Toleranz vorher mit dem Test-Upload ermitteln.
-3. Writer für 6.1, danach Versions-Upgrade.
+2. Writer für 6.1, danach Versions-Upgrade.
+3. Nach Bedarf der Hersteller: fehlende Modellteile (Extension, AdditionalInformation, Classification, Fremdwährung).

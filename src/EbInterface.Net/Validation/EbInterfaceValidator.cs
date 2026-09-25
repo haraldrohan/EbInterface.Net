@@ -32,9 +32,14 @@ namespace EbInterface.Validation
         /// <param name="xml">Das Dokument.</param>
         /// <param name="options">Einstellungen; <c>null</c> = Vorgaben.</param>
         public static ValidationResult Validate(Stream xml, ValidationOptions? options = null)
+            => Validate(xml, options, out _);
+
+        /// <summary>Wie <see cref="Validate(Stream, ValidationOptions)"/>; liefert zusätzlich das geladene Dokument (für den Reader).</summary>
+        internal static ValidationResult Validate(Stream xml, ValidationOptions? options, out XDocument? loaded)
         {
             if (xml is null) throw new ArgumentNullException(nameof(xml));
             options ??= new ValidationOptions();
+            loaded = null;
 
             var messages = new List<ValidationMessage>();
 
@@ -44,6 +49,7 @@ namespace EbInterface.Validation
             {
                 using var reader = XmlReader.Create(xml, XmlSettings.CreateSecureReaderSettings(closeInput: false));
                 document = XDocument.Load(reader, LoadOptions.SetLineInfo);
+                loaded = document;
             }
             catch (XmlException ex)
             {
