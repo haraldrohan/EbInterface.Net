@@ -14,3 +14,4 @@ Alle wesentlichen Änderungen werden hier dokumentiert. Das Format folgt [Keep a
 - Prüfung der maximal vier Nachkommastellen bei Division durch `BaseQuantity`.
 - Prüfung der Auftragsreferenzformate, der Bundespositionsnummern sowie von Lieferantennummer und Biller-E-Mail.
 - Prüfung der maximal 999 Rechnungszeilen sowie der Anzahl und Grenzen von Skonto-Elementen.
+- Prüfung unterstützter Zahlungsarten sowie der Konten- und IBAN-Regeln für Überweisungen.

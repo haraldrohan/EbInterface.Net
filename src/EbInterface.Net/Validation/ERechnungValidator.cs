@@ -55,6 +55,7 @@ namespace EbInterface.Validation
             ValidateSupplierNumber(invoice, ns, messages);
             ValidateBillerEmail(invoice, ns, messages);
             ValidateLineAndDiscountLimits(invoice, ns, messages);
+            ValidatePaymentMethod(invoice, ns, messages);
         }
 
         private static void ValidateDocumentType(XElement invoice, IList<ValidationMessage> messages)
@@ -271,6 +272,74 @@ namespace EbInterface.Validation
                         "Der Skonto-Prozentsatz muss größer als 0 und kleiner als 100 sein.",
                         GetLine(discount),
                         GetPosition(discount)));
+                }
+            }
+        }
+
+        private static void ValidatePaymentMethod(
+            XElement invoice,
+            XNamespace ns,
+            IList<ValidationMessage> messages)
+        {
+            XElement? paymentMethod = invoice.Element(ns + "PaymentMethod");
+            string documentType = invoice.Attribute("DocumentType")?.Value ?? string.Empty;
+            if (paymentMethod == null)
+            {
+                if (!string.Equals(documentType, "CreditMemo", StringComparison.Ordinal))
+                {
+                    messages.Add(new ValidationMessage(
+                        ValidationSeverity.Error,
+                        "ERB-14",
+                        "Rechnungen müssen eine Zahlungsart enthalten.",
+                        GetLine(invoice),
+                        GetPosition(invoice)));
+                }
+
+                return;
+            }
+
+            XElement? payment = paymentMethod.Elements().FirstOrDefault(element =>
+                element.Name == ns + "NoPayment" ||
+                element.Name == ns + "SEPADirectDebit" ||
+                element.Name == ns + "UniversalBankTransaction" ||
+                element.Name == ns + "PaymentCard" ||
+                element.Name == ns + "OtherPayment");
+            if (payment == null)
+            {
+                return;
+            }
+
+            if (payment.Name == ns + "PaymentCard" || payment.Name == ns + "OtherPayment")
+            {
+                messages.Add(new ValidationMessage(
+                    ValidationSeverity.Error,
+                    "ERB-11",
+                    "PaymentCard und OtherPayment werden von e-Rechnung.gv.at nicht unterstützt.",
+                    GetLine(payment),
+                    GetPosition(payment)));
+            }
+            else if (payment.Name == ns + "UniversalBankTransaction")
+            {
+                IList<XElement> accounts = payment.Elements(ns + "BeneficiaryAccount").ToList();
+                if (accounts.Count != 1)
+                {
+                    messages.Add(new ValidationMessage(
+                        ValidationSeverity.Error,
+                        "ERB-12",
+                        "UniversalBankTransaction muss genau ein BeneficiaryAccount enthalten.",
+                        GetLine(payment),
+                        GetPosition(payment)));
+                }
+
+                if (accounts.Count == 1 &&
+                    string.IsNullOrWhiteSpace(accounts[0].Element(ns + "IBAN")?.Value))
+                {
+                    messages.Add(new ValidationMessage(
+                        ValidationSeverity.Error,
+                        "ERB-13",
+                        "Eine Überweisung muss eine IBAN enthalten.",
+                        GetLine(accounts[0]),
+                        GetPosition(accounts[0])));
                 }
             }
         }

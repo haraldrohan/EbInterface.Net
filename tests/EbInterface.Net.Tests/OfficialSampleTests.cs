@@ -237,6 +237,46 @@ namespace EbInterface.Tests
             Assert.Contains(result.Errors, message => message.Code == "ERB-10");
         }
 
+        [Fact]
+        public void UnsupportedPaymentCard_ReportsErbCode()
+        {
+            var document = XDocument.Load(SamplePath);
+            XElement invoice = document.Root ?? throw new InvalidOperationException();
+            XNamespace ns = invoice.Name.Namespace;
+            XElement paymentMethod = invoice.Element(ns + "PaymentMethod") ?? throw new InvalidOperationException();
+            paymentMethod.RemoveNodes();
+            paymentMethod.Add(new XElement(
+                ns + "PaymentCard",
+                new XElement(ns + "PrimaryAccountNumber", "4111111111111111")));
+
+            var result = Validate(document);
+
+            Assert.Contains(result.Errors, message => message.Code == "ERB-11");
+        }
+
+        [Fact]
+        public void MissingTransferIban_ReportsErbCode()
+        {
+            var document = XDocument.Load(SamplePath);
+            XElement invoice = document.Root ?? throw new InvalidOperationException();
+            XNamespace ns = invoice.Name.Namespace;
+            invoice.Descendants(ns + "IBAN").First().Remove();
+
+            var result = Validate(document);
+
+            Assert.Contains(result.Errors, message => message.Code == "ERB-13");
+        }
+
+        [Fact]
+        public void TransferWithOneAccount_IsAccepted()
+        {
+            var result = Validate(XDocument.Load(SamplePath));
+
+            Assert.DoesNotContain(result.Errors, message => message.Code == "ERB-11");
+            Assert.DoesNotContain(result.Errors, message => message.Code == "ERB-12");
+            Assert.DoesNotContain(result.Errors, message => message.Code == "ERB-13");
+        }
+
         private static ValidationResult Validate(XDocument document)
         {
             using var stream = new MemoryStream();
