@@ -386,7 +386,7 @@ namespace EbInterface.Validation
                 }
 
                 // Abgelehnt wird nur, wenn BEIDE Divisionen mehr als vier Nachkommastellen ergeben.
-                if (DecimalPlaces(qty / baseQuantity) > 4 && DecimalPlaces(price / baseQuantity) > 4)
+                if (DecimalMath.DecimalPlaces(qty / baseQuantity) > 4 && DecimalMath.DecimalPlaces(price / baseQuantity) > 4)
                 {
                     ctx.Error("ERB-21", unitPrice,
                         $"Mit BaseQuantity {baseText} ergeben weder Menge ({quantity.Value.Trim()}) noch Einzelpreis " +
@@ -431,14 +431,6 @@ namespace EbInterface.Validation
         private static bool TryParseDecimal(string text, out decimal value) =>
             decimal.TryParse(text.Trim(), NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint,
                 CultureInfo.InvariantCulture, out value);
-
-        /// <summary>Anzahl der Nachkommastellen ohne abschließende Nullen (1.500 → 1).</summary>
-        private static int DecimalPlaces(decimal value)
-        {
-            // Division durch 1.000…0 entfernt abschließende Nullen aus der internen Darstellung.
-            decimal normalized = value / 1.0000000000000000000000000000m;
-            return (decimal.GetBits(normalized)[3] >> 16) & 0xFF;
-        }
 
         private enum OrderReferenceKind
         {

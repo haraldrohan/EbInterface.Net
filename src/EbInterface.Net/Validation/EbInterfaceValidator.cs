@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
-using System.Xml.Schema;
 using EbInterface.Internal;
 
 namespace EbInterface.Validation
@@ -82,12 +81,7 @@ namespace EbInterface.Validation
             }
 
             // Stufe 3: XML-Schema
-            document.Validate(SchemaCache.Get(version), (sender, e) => messages.Add(new ValidationMessage(
-                e.Severity == XmlSeverityType.Error ? ValidationSeverity.Error : ValidationSeverity.Warning,
-                "XSD-01",
-                $"Verstoß gegen das Schema von {version.ToDisplayString()}: {e.Message}",
-                LineInfo.Line(sender as IXmlLineInfo, e.Exception?.LineNumber ?? 0),
-                LineInfo.Position(sender as IXmlLineInfo, e.Exception?.LinePosition ?? 0))));
+            SchemaCheck.Run(document, SchemaCache.Get(version), version, messages);
 
             // Stufe 4: Regeln von e-Rechnung.gv.at
             if (options.Profile == ValidationProfile.ERechnungGvAt &&

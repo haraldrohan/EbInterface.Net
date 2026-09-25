@@ -81,7 +81,7 @@ namespace EbInterface.Tests
 
             var result = Validate(document, ERechnung);
 
-            Assert.All(result.Errors, m => Assert.Equal("XSD-01", m.Code));
+            Assert.All(result.Errors, m => Assert.StartsWith("XSD-", m.Code));
         }
 
         private sealed class NonSeekableStream : Stream

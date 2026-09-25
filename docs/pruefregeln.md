@@ -2,6 +2,7 @@
 
 Die Prüfung läuft in Stufen. Eine Stufe läuft nur, wenn die vorige ohne Fehler bestanden wurde.
 Die Codes sind stabil: Nach der ersten veröffentlichten Version ändert sich ihre Bedeutung nicht mehr.
+Die Meldungen sind deutsch, unabhängig von Sprache und Version der .NET-Laufzeit; nur XSD-01 enthält zusätzlich den Originaltext von .NET.
 
 ## Standard (immer)
 
@@ -11,7 +12,14 @@ Die Codes sind stabil: Nach der ersten veröffentlichten Version ändert sich ih
 | VER-01 | Version | Kein ebInterface: Das Wurzelelement ist nicht `Invoice` in einem ebInterface-Namespace. |
 | VER-02 | Version | Die Version wird erkannt, aber von dieser Bibliotheksversion noch nicht geprüft (derzeit 4.3). |
 | VER-03 | Version | Veraltete ebInterface-Version (z. B. 4.2 oder 3.0), die nicht unterstützt wird. |
-| XSD-01 | Schema | Verstoß gegen das XML-Schema der erkannten Version. |
+| XSD-01 | Schema | Sonstiger Verstoß gegen das XML-Schema (Meldung von .NET, wenn keine genauere Einordnung möglich ist). |
+| XSD-02 | Schema | Pflichtelement fehlt am Ende eines Elements. |
+| XSD-03 | Schema | Element an dieser Stelle nicht erlaubt: falsche Reihenfolge, fehlendes Pflichtelement davor oder zu viele Wiederholungen. |
+| XSD-04 | Schema | Element ist in dieser ebInterface-Version nicht definiert (Tippfehler, fremder Namespace). |
+| XSD-05 | Schema | Text in einem Element, das nur Unterelemente enthalten darf. |
+| XSD-06 | Schema | Ungültiger Wert in einem Element oder Attribut, mit Grund (Format, zulässige Werte, Länge, Nachkommastellen, Grenzen). |
+| XSD-07 | Schema | Pflichtattribut fehlt. |
+| XSD-08 | Schema | Attribut ist an diesem Element nicht vorgesehen. |
 
 ## e-Rechnung.gv.at (`ValidationProfile.ERechnungGvAt`)
 

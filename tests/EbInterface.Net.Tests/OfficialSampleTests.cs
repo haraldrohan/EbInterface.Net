@@ -43,7 +43,7 @@ namespace EbInterface.Tests
                 Path.Combine(StandardsRoot, "ebInterface6p1", "samples", "ebinterface_6p1_sample_ecosio_invalid.xml"));
 
             var error = Assert.Single(result.Errors);
-            Assert.Equal("XSD-01", error.Code);
+            Assert.StartsWith("XSD-", error.Code);
             Assert.True(error.Line > 0);
         }
     }

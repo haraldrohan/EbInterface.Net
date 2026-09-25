@@ -40,7 +40,9 @@ Eine Stufe läuft nur, wenn die vorige ohne Fehler bestanden wurde:
 
 1. **XML** – wohlgeformt? (`XML-xx`)
 2. **Version** – `Invoice` in bekanntem Namespace? (`VER-xx`)
-3. **Schema** – XSD der erkannten Version (`XSD-xx`); vorhanden für 5.0/6.0/6.1
+3. **Schema** – XSD der erkannten Version (`XSD-xx`); vorhanden für 5.0/6.0/6.1. Eigener Durchlauf mit
+   `XmlSchemaValidator` (`Internal/SchemaCheck`), damit die Meldungen deutsch und laufzeitunabhängig sind –
+   .NET-Meldungstexte nie parsen (unter .NET Framework mit Sprachpaket sind sie bereits deutsch)
 4. **e-Rechnung.gv.at** – nur im Profil `ERechnungGvAt` (`ERB-xx`); Regeln für 4.3–6.1 umgesetzt, 4.3 greift erst
    mit der XSD-Prüfung für 4.3
 5. später: EN-16931-Regeln für 7.0
@@ -115,14 +117,13 @@ dotnet pack src/EbInterface.Net -c Release -o artifacts
 
 ## Stand und nächste Schritte
 
-Erledigt: Versionserkennung (4.3–6.1), XSD-Prüfung 5.0/6.0/6.1, XXE-Schutz, Prüfprofile, Regeln von
+Erledigt: Versionserkennung (4.3–6.1), XSD-Prüfung 5.0/6.0/6.1 mit deutschen Meldungen, XXE-Schutz, Prüfprofile, Regeln von
 e-Rechnung.gv.at (ERB-01 bis ERB-38), eigene Testdaten, CI.
 
 Als Nächstes, in dieser Reihenfolge:
-1. Deutsche, verständliche Texte für die häufigsten XSD-Fehler (statt der englischen .NET-Meldungen).
-2. XSD-Prüfung für 4.3 (xmldsig-Schema lokal einbetten) – damit greifen auch die ERB-Regeln für 4.3.
-3. Offene fachliche Punkte klären, sobald der Test-Upload verfügbar ist: Was prüft e-Rechnung.gv.at an
+1. XSD-Prüfung für 4.3 (xmldsig-Schema lokal einbetten) – damit greifen auch die ERB-Regeln für 4.3.
+2. Offene fachliche Punkte klären, sobald der Test-Upload verfügbar ist: Was prüft e-Rechnung.gv.at an
    `PayableAmount`? Zählt „999 Rechnungs- und/oder Below-The-Line-Zeilen“ zusammen oder getrennt? Welche
    Zeilen-`OrderID` gilt bei anderen Empfängern als „andere Bestellung“?
-4. Rechnungsmodell `EbInvoice` + Reader für 5.0/6.0/6.1.
-5. Writer für 6.1, danach Versions-Upgrade.
+3. Rechnungsmodell `EbInvoice` + Reader für 5.0/6.0/6.1.
+4. Writer für 6.1, danach Versions-Upgrade.
