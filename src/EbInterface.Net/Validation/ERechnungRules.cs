@@ -14,7 +14,7 @@ namespace EbInterface.Validation
     /// Auftragsreferenzen: https://www.erechnung.gv.at/go/orderref_fedgov und .../go/orderref_others.
     /// Die Codes sind stabil; die Übersicht steht in docs/pruefregeln.md.
     /// </summary>
-    internal static class ERechnungRules
+    internal static partial class ERechnungRules
     {
         private static readonly HashSet<string> AllowedDocumentTypes = new HashSet<string>(StringComparer.Ordinal)
         {
@@ -52,6 +52,7 @@ namespace EbInterface.Validation
             CheckDueDate(ctx, referenceDate);
             CheckDiscountDates(ctx, referenceDate);
             CheckVatIdentificationNumbers(ctx);
+            CheckArithmetic(ctx);
             CheckDeliveryDescriptions(ctx);
             CheckBaseQuantity(ctx);
             ReportIgnoredElements(ctx);

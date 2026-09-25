@@ -57,6 +57,10 @@ selbst prüfen. Die Bibliothek prüft das Format.
 | ERB-23 | Fehler | Österreichische UID-Nummer (`ATU…`) von Rechnungssteller oder -empfänger mit falscher Prüfziffer. *Vom Test-Upload gemeldet (AF-0069).* |
 | ERB-24 | Fehler | Zahlungsziel (`PaymentConditions/DueDate`) liegt vor dem Stichtag. *Vom Test-Upload gemeldet (EBI61-0120).* |
 | ERB-25 | Fehler | Skontodatum liegt nicht vor dem Zahlungsziel. *Vom Test-Upload gemeldet (EBI61-0017).* |
+| ERB-26 | Fehler | Zeilenbetrag weicht von Menge × Einzelpreis ÷ Preiseinheit − Abschläge + Aufschläge ab (netto oder brutto mehr als 0,10). *Test-Upload: AF-0025, AF-0026, AF-0089.* |
+| ERB-27 | Fehler | Zahlbetrag weicht von der Summe der Zeilen brutto ± Auf-/Abschläge auf Rechnungsebene + Below-The-Line-Beträge ab (Toleranz 0,10 je Posten). *Test-Upload: AF-0028.* |
+| ERB-28 | Fehler | Rundungsbetrag (`RoundingAmount`) außerhalb von −0,02 bis 0,02. *Test-Upload: AF-0122.* |
+| ERB-29 | Fehler | Steuergrundlage eines Steuersatzes weicht von der Summe der zugehörigen Zeilen ± Auf-/Abschläge ab (Toleranz 0,10 je Posten). *Test-Upload: AF-0032.* |
 | ERB-30 | Warnung | `TradingName` wird nicht ausgewertet (5.0, 6.0, 6.1). |
 | ERB-31 | Warnung | `AddressExtension` wird nicht ausgewertet. |
 | ERB-32 | Warnung | Erweiterungselemente (`Extension`) werden nicht ausgewertet (6.0, 6.1). |
@@ -66,6 +70,7 @@ selbst prüfen. Die Bibliothek prüft das Format.
 | ERB-36 | Warnung | `ListLineItem/AdditionalInformation` wird nicht ausgewertet (4.3). |
 | ERB-37 | Warnung | `PresentationDetails` wird nicht ausgewertet (4.3). |
 | ERB-38 | Warnung | `VATRate/@TaxCode` wird nicht ausgewertet (4.3). |
+| ERB-39 | Fehler | Steuerbetrag weicht vom Steuersatz auf die aus den Zeilen berechnete Grundlage ab (mehr als 0,10). *Test-Upload: AF-0033.* |
 
 ### Auftragsreferenz (ERB-03)
 
@@ -110,12 +115,20 @@ EKG:Referenz bis 50 Zeichen), Bestellpositionsnummern (ERB-05), 999 Zeilen einsc
 BaseQuantity nur bei beiden Divisionen (ERB-21), fehlende FS/FN/FBG werden angenommen (daher Warnung ERB-09),
 `TotalGrossAmount` wird nicht ausgewertet. 5.0 und 6.0 kennen keine Below-The-Line-Zeilen.
 
-**Zusätzlich vom Portal geprüft und hier umgesetzt:** ERB-22 bis ERB-25.
+**Zusätzlich vom Portal geprüft und hier umgesetzt:** ERB-22 bis ERB-29 und ERB-39.
 
 **Vom Portal geprüft, offline nicht möglich:**
 - ob eine Einkäufergruppe existiert (AF-0094) und ob Empfängerkennung und interne Referenz eines anderen Empfängers
   gültig sind (AF-0126). Andere Empfänger sind im Testsystem nur teilweise hinterlegt.
 - Bestellnummern des Bundes werden im Testsystem nicht auf Existenz geprüft.
 
-**Vom Portal geprüft, noch nicht umgesetzt:** Rechenprüfungen – Zeilenbetrag = Menge × Einzelpreis (AF-0025),
-Zeilen-Bruttobetrag (AF-0026), `PayableAmount` = Summe der Bruttobeträge ± Auf- und Abschläge (AF-0028).
+**Rechenprüfungen (ERB-26 bis ERB-29, ERB-39):** Das Portal rechnet mit Menge × Einzelpreis, nicht mit den angegebenen
+Zeilenbeträgen. Toleranz: 0,10 je Betrag (0,10 angenommen, 0,12 abgelehnt), bei Summen 0,10 je summiertem Posten
+(2 Zeilen: 0,20 angenommen, 0,25 abgelehnt; 1 Zeile: 0,15 abgelehnt). Rundung pro Zeile oder über die Summe ist
+beides zulässig. Zeilenrabatte, Zuschläge auf Rechnungsebene und Below-The-Line-Beträge werden eingerechnet;
+`PrepaidAmount` wird **nicht** vom Zahlbetrag abgezogen. Ob die Toleranz der Steuergrundlage ebenfalls mit der
+Postenzahl wächst, war nicht zu unterscheiden; die Bibliothek nimmt die großzügigere Auslegung.
+
+**Gesamtabgleich:** Über alle rund 80 Uploads stimmt das Urteil der Bibliothek mit dem Portal überein, außer bei den
+offline nicht prüfbaren Existenzprüfungen (AF-0094, AF-0126). Es gab keinen Fall, den die Bibliothek ablehnt und das
+Portal annimmt.
