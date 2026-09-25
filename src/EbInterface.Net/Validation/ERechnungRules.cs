@@ -50,6 +50,8 @@ namespace EbInterface.Validation
             CheckDiscounts(ctx);
             CheckPaymentMethod(ctx);
             CheckDueDate(ctx, referenceDate);
+            CheckDiscountDates(ctx, referenceDate);
+            CheckVatIdentificationNumbers(ctx);
             CheckDeliveryDescriptions(ctx);
             CheckBaseQuantity(ctx);
             ReportIgnoredElements(ctx);
@@ -99,41 +101,35 @@ namespace EbInterface.Validation
                 .Distinct(StringComparer.Ordinal)
                 .ToList();
 
+            // Laut Regelseite nur eine Bestellung pro Rechnung; der Test-Upload lehnt abweichende Zeilenreferenzen aber
+            // nicht ab (geprüft 2026-09-25). Daher nur Warnungen (ERB-04, ERB-06).
             if (lineOrderIds.Count > 1)
             {
-                ctx.Error("ERB-04", ctx.Invoice,
-                    "Die Rechnung bezieht sich auf mehrere Bestellungen (" + string.Join(", ", lineOrderIds) + "). " +
-                    "e-Rechnung.gv.at erlaubt nur eine Bestellung pro Rechnung.");
-            }
-
-            if (kind == OrderReferenceKind.FederalOrderNumber)
-            {
-                foreach (var item in lineReferences)
-                {
-                    string lineOrderId = item.Reference?.Element(ctx.Ns + "OrderID")?.Value.Trim() ?? string.Empty;
-                    string position = item.Reference?.Element(ctx.Ns + "OrderPositionNumber")?.Value.Trim() ?? string.Empty;
-
-                    if (lineOrderId.Length > 0 && lineOrderId != orderId && lineOrderIds.Count == 1)
-                    {
-                        ctx.Error("ERB-04", item.Reference!,
-                            $"Die Rechnungszeile verweist auf die Bestellung '{lineOrderId}', die Rechnung auf '{orderId}'. " +
-                            "e-Rechnung.gv.at erlaubt nur eine Bestellung pro Rechnung.");
-                    }
-
-                    if (lineOrderId.Length == 0 || !Digits.IsMatch(position))
-                    {
-                        ctx.Error("ERB-05", item.Line,
-                            "Bei einer Bestellnummer des Bundes braucht jede Rechnungszeile " +
-                            "InvoiceRecipientsOrderReference mit OrderID (gleich der Bestellnummer) und einer " +
-                            "numerischen OrderPositionNumber (Bestellpositionsnummer).");
-                    }
-                }
+                ctx.Warning("ERB-04", ctx.Invoice,
+                    "Die Rechnungszeilen verweisen auf mehrere Bestellungen (" + string.Join(", ", lineOrderIds) + "). " +
+                    "e-Rechnung.gv.at sieht nur eine Bestellung pro Rechnung vor.");
             }
             else if (lineOrderIds.Count == 1 && lineOrderIds[0] != orderId)
             {
                 ctx.Warning("ERB-06", ctx.Invoice,
                     $"Die Rechnungszeilen verweisen auf '{lineOrderIds[0]}', die Auftragsreferenz lautet '{orderId}'. " +
                     "e-Rechnung.gv.at empfiehlt denselben Wert.");
+            }
+
+            if (kind != OrderReferenceKind.FederalOrderNumber) return;
+
+            foreach (var item in lineReferences)
+            {
+                string lineOrderId = item.Reference?.Element(ctx.Ns + "OrderID")?.Value.Trim() ?? string.Empty;
+                string position = item.Reference?.Element(ctx.Ns + "OrderPositionNumber")?.Value.Trim() ?? string.Empty;
+
+                if (lineOrderId.Length == 0 || !Digits.IsMatch(position))
+                {
+                    ctx.Error("ERB-05", item.Line,
+                        "Bei einer Bestellnummer des Bundes braucht jede Rechnungszeile " +
+                        "InvoiceRecipientsOrderReference mit OrderID (gleich der Bestellnummer) und einer " +
+                        "numerischen OrderPositionNumber (Bestellpositionsnummer).");
+                }
             }
         }
 
@@ -332,23 +328,107 @@ namespace EbInterface.Validation
             }
         }
 
-        // ERB-18
+        // ERB-18; ERB-24 – nicht auf der Regelseite, vom Test-Upload gemeldet (EBI61-0120, geprüft 2026-09-25)
         private static void CheckDueDate(Context ctx, DateTime referenceDate)
         {
             XElement? dueDate = ctx.Invoice.Element(ctx.Ns + "PaymentConditions")?.Element(ctx.Ns + "DueDate");
-            string text = dueDate?.Value.Trim() ?? string.Empty;
-            if (text.Length < 10 ||
-                !DateTime.TryParseExact(text.Substring(0, 10), "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime date))
+            if (dueDate == null || !TryParseDate(dueDate.Value, out DateTime date))
             {
                 return;
             }
 
+            string text = dueDate.Value.Trim();
+
             DateTime latest = referenceDate.AddDays(999);
             if (date > latest)
             {
-                ctx.Error("ERB-18", dueDate!,
+                ctx.Error("ERB-18", dueDate,
                     $"Das Zahlungsziel {text} liegt mehr als 999 Tage in der Zukunft (spätestens {latest:yyyy-MM-dd}).");
             }
+
+            if (date < referenceDate)
+            {
+                ctx.Error("ERB-24", dueDate,
+                    $"Das Zahlungsziel {text} liegt vor dem heutigen Datum ({referenceDate:yyyy-MM-dd}); " +
+                        "e-Rechnung.gv.at nimmt keine bereits fälligen Zahlungsziele an.");
+            }
+        }
+
+        // ERB-22 und ERB-25 – nicht auf der Regelseite, vom Test-Upload gemeldet (EBI61-0121, EBI61-0017; geprüft 2026-09-25)
+        private static void CheckDiscountDates(Context ctx, DateTime referenceDate)
+        {
+            XElement? conditions = ctx.Invoice.Element(ctx.Ns + "PaymentConditions");
+            if (conditions == null) return;
+
+            bool hasDueDate = TryParseDate(conditions.Element(ctx.Ns + "DueDate")?.Value ?? string.Empty, out DateTime dueDate);
+
+            foreach (XElement paymentDate in conditions.Elements(ctx.Ns + "Discount").Elements(ctx.Ns + "PaymentDate"))
+            {
+                if (TryParseDate(paymentDate.Value, out DateTime date) && date <= referenceDate)
+                {
+                    ctx.Error("ERB-22", paymentDate,
+                        $"Das Skontodatum {paymentDate.Value.Trim()} muss nach dem heutigen Datum ({referenceDate:yyyy-MM-dd}) liegen; " +
+                        "abgelaufene Skonti nimmt e-Rechnung.gv.at nicht an.");
+                }
+
+                if (hasDueDate && TryParseDate(paymentDate.Value, out DateTime discountDate) && discountDate >= dueDate)
+                {
+                    ctx.Error("ERB-25", paymentDate,
+                        $"Das Skontodatum {paymentDate.Value.Trim()} muss vor dem Zahlungsziel ({dueDate:yyyy-MM-dd}) liegen.");
+                }
+            }
+        }
+
+        // ERB-23 – nicht auf der Regelseite, vom Test-Upload gemeldet (AF-0069, geprüft 2026-09-25)
+        private static void CheckVatIdentificationNumbers(Context ctx)
+        {
+            foreach (string party in new[] { "Biller", "InvoiceRecipient" })
+            {
+                XElement? uid = ctx.Invoice.Element(ctx.Ns + party)?.Element(ctx.Ns + "VATIdentificationNumber");
+                string value = uid?.Value.Trim() ?? string.Empty;
+                if (value.StartsWith("ATU", StringComparison.OrdinalIgnoreCase) && !IsValidAustrianUid(value))
+                {
+                    ctx.Error("ERB-23", uid!,
+                        $"Die österreichische UID-Nummer '{value}' ist ungültig: Sie muss aus ATU und acht Ziffern bestehen, " +
+                        "deren letzte die Prüfziffer ist.");
+                }
+            }
+        }
+
+        /// <summary>Prüfziffer nach dem Verfahren des BMF für UID-Nummern (ATU + 7 Ziffern + Prüfziffer).</summary>
+        private static bool IsValidAustrianUid(string uid)
+        {
+            if (uid.Length != 11 || !uid.StartsWith("ATU", StringComparison.Ordinal)) return false;
+
+            int sum = 0;
+            for (int i = 0; i < 8; i++)
+            {
+                char c = uid[3 + i];
+                if (c < '0' || c > '9') return false;
+            }
+
+            for (int i = 0; i < 7; i++)
+            {
+                int digit = uid[3 + i] - '0';
+                if (i % 2 == 1)
+                {
+                    int doubled = digit * 2;
+                    digit = doubled / 10 + doubled % 10;
+                }
+
+                sum += digit;
+            }
+
+            int check = (10 - (sum + 4) % 10) % 10;
+            return uid[10] - '0' == check;
+        }
+
+        private static bool TryParseDate(string text, out DateTime date)
+        {
+            text = text.Trim();
+            date = default;
+            return text.Length >= 10 &&
+                DateTime.TryParseExact(text.Substring(0, 10), "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out date);
         }
 
         // ERB-20

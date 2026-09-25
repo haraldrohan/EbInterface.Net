@@ -103,23 +103,23 @@ namespace EbInterface.Tests
         // --- ERB-04/05/06 Bestellung und Positionen ----------------------------------------------
 
         [Fact]
-        public void Erb04_LinesReferToDifferentOrders()
+        public void Erb04_LinesReferToDifferentOrders_IsOnlyAWarning()
         {
             var document = LoadTestData(OrderNumberFile);
             document.Descendants(document.N("InvoiceRecipientsOrderReference")).Last()
                 .Element(document.N("OrderID"))!.Value = "4700000002";
 
-            AssertCode(Validate(document, ERechnung), "ERB-04", true);
+            AssertOnlyWarning(Validate(document, ERechnung), "ERB-04");
         }
 
         [Fact]
-        public void Erb04_LinesReferToOtherOrderThanHeader()
+        public void Erb06_LinesReferToOtherOrderThanHeader_IsOnlyAWarning()
         {
             var document = LoadTestData(OrderNumberFile);
             foreach (XElement id in document.Descendants(document.N("InvoiceRecipientsOrderReference")).Elements(document.N("OrderID")))
                 id.Value = "4700000002";
 
-            AssertCode(Validate(document, ERechnung), "ERB-04", true);
+            AssertOnlyWarning(Validate(document, ERechnung), "ERB-06");
         }
 
         [Theory]
@@ -381,6 +381,63 @@ namespace EbInterface.Tests
             AssertCode(Validate(document, ERechnung), "ERB-21", expectError);
         }
 
+        [Theory]
+        [InlineData(1, false)]
+        [InlineData(0, false)]
+        [InlineData(-1, true)]
+        public void Erb24_DueDateNotInThePast(int daysFromReference, bool expectError)
+        {
+            var document = LoadTestData(OrderNumberFile);
+            document.El("DueDate").Value = ReferenceDate.AddDays(daysFromReference).ToString("yyyy-MM-dd");
+            document.El("PaymentDate").Value = ReferenceDate.AddDays(1).ToString("yyyy-MM-dd");
+
+            AssertCode(Validate(document, ERechnung), "ERB-24", expectError);
+        }
+
+        // --- ERB-22 Skontodatum -----------------------------------------------------------------
+
+        [Theory]
+        [InlineData(1, false)]
+        [InlineData(0, true)]
+        [InlineData(-10, true)]
+        public void Erb22_DiscountDateMustBeAfterReferenceDate(int daysFromReference, bool expectError)
+        {
+            var document = LoadTestData(OrderNumberFile);
+            document.El("PaymentDate").Value = ReferenceDate.AddDays(daysFromReference).ToString("yyyy-MM-dd");
+
+            AssertCode(Validate(document, ERechnung), "ERB-22", expectError);
+        }
+
+        [Theory]
+        [InlineData(-1, false)]
+        [InlineData(0, true)]
+        [InlineData(1, true)]
+        public void Erb25_DiscountDateBeforeDueDate(int daysFromDueDate, bool expectError)
+        {
+            var document = LoadTestData(OrderNumberFile);
+            DateTime dueDate = DateTime.Parse(document.El("DueDate").Value);
+            document.El("PaymentDate").Value = dueDate.AddDays(daysFromDueDate).ToString("yyyy-MM-dd");
+
+            AssertCode(Validate(document, ERechnung), "ERB-25", expectError);
+        }
+
+        // --- ERB-23 UID-Nummer -------------------------------------------------------------------
+
+        [Theory]
+        [InlineData("ATU13585627", false)] // Beispiel-UID aus dem Bund-Beispiel
+        [InlineData("ATU12345675", false)]
+        [InlineData("ATU12345678", true)]  // falsche Prüfziffer
+        [InlineData("ATU1234567", true)]   // zu kurz
+        [InlineData("DE123456789", false)] // ausländische UID: keine Prüfung
+        [InlineData("00000000", false)]    // keine UID vorhanden (ebInterface-Konvention)
+        public void Erb23_AustrianUidCheckDigit(string uid, bool expectError)
+        {
+            var document = LoadTestData(OrderNumberFile);
+            document.El("VATIdentificationNumber").Value = uid;
+
+            AssertCode(Validate(document, ERechnung), "ERB-23", expectError);
+        }
+
         // --- ERB-30 ff. nicht ausgewertete Felder ------------------------------------------------
 
         [Fact]
@@ -464,6 +521,15 @@ namespace EbInterface.Tests
             bool found = result.Messages.Any(m => m.Code == code);
             Assert.True(found == expected,
                 $"{code} {(expected ? "erwartet, aber nicht gemeldet" : "unerwartet gemeldet")}:{Environment.NewLine}{Describe(result)}");
+        }
+
+        /// <summary>Gültig, aber mit genau dieser Warnung (entspricht dem Verhalten des Test-Uploads).</summary>
+        private static void AssertOnlyWarning(ValidationResult result, string code)
+        {
+            Assert.True(result.IsValid, Describe(result));
+            var warning = Assert.Single(result.Messages);
+            Assert.Equal(code, warning.Code);
+            Assert.Equal(ValidationSeverity.Warning, warning.Severity);
         }
 
         private static void SetLineCount(XDocument document, int count)

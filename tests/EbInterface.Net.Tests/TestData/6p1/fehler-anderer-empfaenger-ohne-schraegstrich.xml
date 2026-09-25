@@ -7,7 +7,7 @@
     <Date>2026-08-28</Date>
   </Delivery>
   <Biller>
-    <VATIdentificationNumber>ATU12345678</VATIdentificationNumber>
+    <VATIdentificationNumber>ATU12345675</VATIdentificationNumber>
     <FurtherIdentification IdentificationType="FS">Linz</FurtherIdentification>
     <FurtherIdentification IdentificationType="FN">123456a</FurtherIdentification>
     <FurtherIdentification IdentificationType="FBG">Landesgericht Linz</FurtherIdentification>
@@ -22,7 +22,7 @@
     <InvoiceRecipientsBillerID>50012345</InvoiceRecipientsBillerID>
   </Biller>
   <InvoiceRecipient>
-    <VATIdentificationNumber>ATU00000000</VATIdentificationNumber>
+    <VATIdentificationNumber>ATU76543215</VATIdentificationNumber>
     <OrderReference>
       <OrderID>Z0</OrderID>
     </OrderReference>
@@ -76,9 +76,9 @@
     </UniversalBankTransaction>
   </PaymentMethod>
   <PaymentConditions>
-    <DueDate>2026-10-01</DueDate>
+    <DueDate>2026-10-31</DueDate>
     <Discount>
-      <PaymentDate>2026-09-15</PaymentDate>
+      <PaymentDate>2026-10-15</PaymentDate>
       <Percentage>2.00</Percentage>
     </Discount>
   </PaymentConditions>

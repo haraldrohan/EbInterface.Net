@@ -68,8 +68,8 @@ Grundsätze dazu:
   (https://www.erechnung.gv.at/go/orderref_fedgov, https://www.erechnung.gv.at/go/orderref_others).
   „Alphanumerisch“ schließt Umlaute ein (`\p{L}\p{N}`, z. B. EKG „63Ü“). Maßgeblich ist die aktuelle Seite; ältere
   Implementierungen nennen teils abweichende Längen.
-- Ob Bestellnummer, EKG oder Lieferantennummer existieren, ist offline nicht prüfbar. Unbekannte EKGs nie als Fehler
-  werten. Lieferantennummer nur auf Vorhandensein prüfen (Beispiele zeigen 8 und 10 Stellen).
+- Ob Bestellnummer, EKG oder Lieferantennummer existieren, ist offline nicht prüfbar (das Portal prüft EKGs und
+  andere Empfänger samt interner Referenz empfängerspezifisch). Unbekannte EKGs nie als Fehler werten. Lieferantennummer nur auf Vorhandensein prüfen (Beispiele zeigen 8 und 10 Stellen).
 - Akzeptierte Versionen: 4.3, 5.0, 6.0, 6.1. 4.0–4.2 seit April 2022 nicht mehr, 3.x seit Jänner 2016 nicht mehr.
 
 ## Quellen
@@ -88,8 +88,11 @@ Grundsätze dazu:
   erzeugt die Warnung ERB-09, weil dort FS/FN/FBG fehlen (Stand 2026-09-25) – nach Regeländerungen lokal erneut prüfen.
 - **Einkäufergruppen-Liste** (https://www.erechnung.gv.at/go/ekgrlist-excel): **nur Referenz, nicht einbetten**
   (Lizenz ungeklärt, ändert sich).
-- **Endgültiger Test:** https://test.erechnung.gv.at/go/test_upload – ohne Anmeldung, ohne USP (geprüft 2026-09-25).
-  Nur eigene Testrechnungen hochladen, keine echten Rechnungsdaten.
+- **Endgültiger Test:** https://test.erechnung.gv.at/go/test_upload – ohne Anmeldung, ohne USP. Nur eigene,
+  synthetische Testrechnungen hochladen, keine echten Rechnungsdaten. Formular: POST mit `invoice` (Datei),
+  `action=perform` und `$ph_nonce` aus der Seite (Sitzungs-Cookie nötig). Höchstens etwa eine Anfrage pro 45 Sekunden,
+  sonst sperrt das Portal vorübergehend. Testdaten brauchen gültige UIDs (Prüfziffer) und Datumswerte in der Zukunft.
+  Ergebnisse des Abgleichs vom 25./26.09.2026 stehen in `docs/pruefregeln.md`.
 - **Referenzimplementierung .NET (archiviert, MIT, (c) 2015 AUSTRIAPRO):**
   https://github.com/austriapro/ebinterface-word-plugin – u. a. `ebIModels/Models/erbInvoiceValidation.cs`,
   `ebIValidation/Validation/*` (IBAN, BIC, UID, GLN). Deckt 4.0–5.0 ab. **Neu schreiben, nicht forken.** Wo Code oder
@@ -123,11 +126,10 @@ dotnet pack src/EbInterface.Net -c Release -o artifacts
 ## Stand und nächste Schritte
 
 Erledigt: Versionserkennung (4.3–6.1), XSD-Prüfung 4.3–6.1 mit deutschen Meldungen, XXE-Schutz, Prüfprofile, Regeln von
-e-Rechnung.gv.at (ERB-01 bis ERB-38), eigene Testdaten, CI.
+e-Rechnung.gv.at (ERB-01 bis ERB-38) samt Abgleich mit dem Test-Upload, eigene Testdaten, CI.
 
 Als Nächstes, in dieser Reihenfolge:
-1. Offene fachliche Punkte mit dem Test-Upload klären: Was prüft e-Rechnung.gv.at an
-   `PayableAmount`? Zählt „999 Rechnungs- und/oder Below-The-Line-Zeilen“ zusammen oder getrennt? Welche
-   Zeilen-`OrderID` gilt bei anderen Empfängern als „andere Bestellung“?
-2. Rechnungsmodell `EbInvoice` + Reader für 5.0/6.0/6.1.
+1. Rechnungsmodell `EbInvoice` + Reader für 4.3/5.0/6.0/6.1.
+2. Rechenprüfungen wie im Portal (AF-0025 Zeilenbetrag, AF-0026 Zeilen-Brutto, AF-0028 `PayableAmount`) auf Basis
+   des Modells, inklusive Auf-/Abschlägen und Rundungstoleranz – Toleranz vorher mit dem Test-Upload ermitteln.
 3. Writer für 6.1, danach Versions-Upgrade.

@@ -10,4 +10,5 @@ Alle wesentlichen Änderungen werden hier dokumentiert. Das Format folgt [Keep a
 - Sicheres Einlesen ohne DTD-Verarbeitung (XXE-Schutz).
 - Prüfprofil `ValidationProfile.ERechnungGvAt` mit den Regeln von e-Rechnung.gv.at für 4.3, 5.0, 6.0 und 6.1 (`ERB-01` bis `ERB-38`), darunter Auftragsreferenzen für Bund und andere Empfänger, Bestellpositionsnummern, Zahlungsarten, Skonto, Zeilenanzahl und `BaseQuantity`. Übersicht in `docs/pruefregeln.md`.
 - `ValidationOptions.ReferenceDate` als Stichtag für datumsabhängige Regeln.
+- Regeln, die der Test-Upload von e-Rechnung.gv.at zusätzlich zur Regelseite prüft: Skontodatum nach dem Stichtag und vor dem Zahlungsziel (`ERB-22`, `ERB-25`), Prüfziffer österreichischer UID-Nummern (`ERB-23`), Zahlungsziel nicht in der Vergangenheit (`ERB-24`). Abweichende Zeilenreferenzen (`ERB-04`) sind nur noch eine Warnung, weil das Portal sie annimmt.
 - Tests gegen die offiziellen Beispielrechnungen von AUSTRIAPRO und eigene Testrechnungen.

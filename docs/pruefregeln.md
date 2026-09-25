@@ -35,7 +35,7 @@ selbst prüfen. Die Bibliothek prüft das Format.
 | ERB-01 | Fehler | `DocumentType` nur Invoice, InvoiceForAdvancePayment, InvoiceForPartialDelivery, FinalSettlement oder CreditMemo. |
 | ERB-02 | Fehler | `InvoiceRecipient/OrderReference/OrderID` (Auftragsreferenz) fehlt. |
 | ERB-03 | Fehler | Auftragsreferenz hat kein gültiges Format (siehe unten). |
-| ERB-04 | Fehler | Die Rechnung bezieht sich auf mehrere Bestellungen. |
+| ERB-04 | Warnung | Die Zeilen verweisen auf mehrere Bestellungen (laut Regelseite unzulässig; der Test-Upload lehnt es nicht ab). |
 | ERB-05 | Fehler | Bestellnummer des Bundes: Eine Zeile hat keine `InvoiceRecipientsOrderReference` mit `OrderID` und numerischer `OrderPositionNumber`. |
 | ERB-06 | Warnung | Die Zeilen verweisen auf eine andere Referenz als die Auftragsreferenz im Kopf. |
 | ERB-07 | Fehler | `Biller/InvoiceRecipientsBillerID` (Lieferantennummer) fehlt. |
@@ -53,6 +53,10 @@ selbst prüfen. Die Bibliothek prüft das Format.
 | ERB-19 | Fehler | `NoPayment` bei einer Rechnung, die weder Gutschrift ist noch 0 Euro beträgt. |
 | ERB-20 | Fehler | Lieferbeschreibung (`Delivery/Description`) länger als 500 Zeichen. |
 | ERB-21 | Fehler | Weder Menge noch Einzelpreis geteilt durch `BaseQuantity` ergibt höchstens vier Nachkommastellen. |
+| ERB-22 | Fehler | Skontodatum (`Discount/PaymentDate`) liegt nicht nach dem Stichtag. *Vom Test-Upload gemeldet (EBI61-0121).* |
+| ERB-23 | Fehler | Österreichische UID-Nummer (`ATU…`) von Rechnungssteller oder -empfänger mit falscher Prüfziffer. *Vom Test-Upload gemeldet (AF-0069).* |
+| ERB-24 | Fehler | Zahlungsziel (`PaymentConditions/DueDate`) liegt vor dem Stichtag. *Vom Test-Upload gemeldet (EBI61-0120).* |
+| ERB-25 | Fehler | Skontodatum liegt nicht vor dem Zahlungsziel. *Vom Test-Upload gemeldet (EBI61-0017).* |
 | ERB-30 | Warnung | `TradingName` wird nicht ausgewertet (5.0, 6.0, 6.1). |
 | ERB-31 | Warnung | `AddressExtension` wird nicht ausgewertet. |
 | ERB-32 | Warnung | Erweiterungselemente (`Extension`) werden nicht ausgewertet (6.0, 6.1). |
@@ -81,11 +85,13 @@ Die Art des Empfängers ergibt sich allein aus dem Format der Auftragsreferenz:
 Wo die Quelle Spielraum lässt, prüft die Bibliothek so, dass sie gültige Rechnungen nicht fälschlich ablehnt:
 
 - **Andere Empfänger:** Die Quelle verlangt „zumindest 3stellig, z. B. `Z0/`“. Der Schrägstrich zählt also mit, und die
-  Empfängeridentifikation braucht mindestens zwei Zeichen. Sie wird nicht auf Buchstaben und Ziffern beschränkt,
-  damit die empfohlenen Verwaltungskennzeichen nicht an Sonderzeichen scheitern.
-- **Zeilenreferenzen:** Die Zeilen-`OrderID` „sollte“ laut Quelle gleich der Auftragsreferenz sein. Ein Fehler (ERB-04)
-  entsteht nur bei einer Bestellnummer des Bundes oder wenn die Zeilen auf verschiedene Bestellungen zeigen; sonst gibt
-  es eine Warnung (ERB-06).
+  Empfängeridentifikation braucht mindestens zwei Zeichen – echte Kennungen wie `L5` (Salzburg) und `L6`
+  (Steiermark) bestätigen das. Nach dem Schrägstrich akzeptiert der Test-Upload auch weitere Schrägstriche,
+  Bindestriche und Unterstriche (`L6/LRW/ABT08/COVID_IMPFEN`, `L5/REF-1000-165`). Welche interne Referenz ein
+  Empfänger annimmt, legt er selbst fest; das ist offline nicht prüfbar.
+- **Zeilenreferenzen:** Die Zeilen-`OrderID` „sollte“ laut Quelle gleich der Auftragsreferenz sein, und eine Rechnung
+  darf sich nur auf eine Bestellung beziehen. Der Test-Upload lehnt abweichende oder mehrere Zeilenreferenzen aber
+  nicht ab – auch nicht bei Bestellnummern des Bundes. Daher nur Warnungen (ERB-04, ERB-06).
 - **Firmenangaben (ERB-09):** § 14 UGB gilt nur für Unternehmen im Firmenbuch. Das ist offline nicht feststellbar,
   daher gibt es eine Warnung statt eines Fehlers.
 - **BaseQuantity (ERB-21):** Abgelehnt wird nur, wenn *beide* Divisionen mehr als vier Nachkommastellen ergeben.
@@ -93,3 +99,23 @@ Wo die Quelle Spielraum lässt, prüft die Bibliothek so, dass sie gültige Rech
 - **Lieferbeschreibung (ERB-20):** Die Quelle nennt `Delivery/Comment`; im Schema heißt das Element `Description`.
 - **Stichtag (ERB-18):** Vorgabe ist das heutige Datum; über `ValidationOptions.ReferenceDate` einstellbar.
 - **Nicht ausgewertete Felder (ERB-30 ff.):** Das sind keine Fehler. Die Warnung erscheint je Feld einmal.
+
+## Abgleich mit dem Test-Upload
+
+Am 25./26.09.2026 wurden rund 45 eigene, synthetische Testrechnungen (6.1) in den
+[Test-Upload](https://test.erechnung.gv.at/go/test_upload) geladen. Ergebnisse:
+
+**Bestätigt:** Dokumenttypen, Auftragsreferenzen des Bundes (Bestellnummer, EKG auch mit Umlaut wie `63Ü`,
+EKG:Referenz bis 50 Zeichen), Bestellpositionsnummern (ERB-05), 999 Zeilen einschließlich Below-The-Line (ERB-10),
+BaseQuantity nur bei beiden Divisionen (ERB-21), fehlende FS/FN/FBG werden angenommen (daher Warnung ERB-09),
+`TotalGrossAmount` wird nicht ausgewertet. 5.0 und 6.0 kennen keine Below-The-Line-Zeilen.
+
+**Zusätzlich vom Portal geprüft und hier umgesetzt:** ERB-22 bis ERB-25.
+
+**Vom Portal geprüft, offline nicht möglich:**
+- ob eine Einkäufergruppe existiert (AF-0094) und ob Empfängerkennung und interne Referenz eines anderen Empfängers
+  gültig sind (AF-0126). Andere Empfänger sind im Testsystem nur teilweise hinterlegt.
+- Bestellnummern des Bundes werden im Testsystem nicht auf Existenz geprüft.
+
+**Vom Portal geprüft, noch nicht umgesetzt:** Rechenprüfungen – Zeilenbetrag = Menge × Einzelpreis (AF-0025),
+Zeilen-Bruttobetrag (AF-0026), `PayableAmount` = Summe der Bruttobeträge ± Auf- und Abschläge (AF-0028).
