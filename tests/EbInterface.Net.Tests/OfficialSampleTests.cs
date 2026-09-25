@@ -91,6 +91,43 @@ namespace EbInterface.Tests
         }
 
         [Fact]
+        public void InvalidRecipientOrderReference_ReportsErbCode()
+        {
+            var document = XDocument.Load(SamplePath);
+            XElement orderId = GetRecipientOrderId(document);
+            orderId.Value = "Z0";
+
+            var result = Validate(document);
+
+            Assert.Contains(result.Errors, message => message.Code == "ERB-02");
+        }
+
+        [Fact]
+        public void BuyerGroupOrderReference_IsAccepted()
+        {
+            var document = XDocument.Load(SamplePath);
+            XElement orderId = GetRecipientOrderId(document);
+            orderId.Value = "Z01";
+
+            var result = Validate(document);
+
+            Assert.DoesNotContain(result.Errors, message => message.Code == "ERB-02");
+            Assert.DoesNotContain(result.Errors, message => message.Code == "ERB-07");
+        }
+
+        [Fact]
+        public void FederalOrderNumberWithoutLineReference_ReportsErbCode()
+        {
+            var document = XDocument.Load(SamplePath);
+            XElement orderId = GetRecipientOrderId(document);
+            orderId.Value = "4700000001";
+
+            var result = Validate(document);
+
+            Assert.Contains(result.Errors, message => message.Code == "ERB-07");
+        }
+
+        [Fact]
         public void MissingBillerRegisteredOffice_ReportsErbCode()
         {
             var result = Validate(XDocument.Load(SamplePath));
@@ -151,6 +188,15 @@ namespace EbInterface.Tests
             document.Save(stream);
             stream.Position = 0;
             return EbInterfaceValidator.Validate(stream);
+        }
+
+        private static XElement GetRecipientOrderId(XDocument document)
+        {
+            XElement invoice = document.Root ?? throw new InvalidOperationException();
+            XNamespace ns = invoice.Name.Namespace;
+            XElement recipient = invoice.Element(ns + "InvoiceRecipient") ?? throw new InvalidOperationException();
+            XElement orderReference = recipient.Element(ns + "OrderReference") ?? throw new InvalidOperationException();
+            return orderReference.Element(ns + "OrderID") ?? throw new InvalidOperationException();
         }
     }
 

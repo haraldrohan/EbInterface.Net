@@ -40,7 +40,7 @@ Die Prüfung läuft in Stufen; eine Stufe läuft nur, wenn die vorige sinnvoll b
 1. **XML** – wohlgeformt? (Code `XML-xx`)
 2. **Version** – Wurzelelement `Invoice` in bekanntem Namespace? (Code `VER-xx`)
 3. **Schema** – XSD der erkannten Version (Code `XSD-xx`) ✅ vorhanden für 5.0/6.0/6.1
-4. **Bundesregeln** – Sonderregeln von e-Rechnung.gv.at (Code `ERB-xx`) ⏳ nächster Schritt
+4. **Bundesregeln** – Sonderregeln von e-Rechnung.gv.at (Code `ERB-xx`) ⏳ teilweise vorhanden
 5. später: EN-16931-Regeln für 7.0
 
 Fehlercodes sind **stabil** (dürfen sich nach Veröffentlichung nicht ändern), Meldungen auf **Deutsch**,
@@ -56,6 +56,17 @@ Schema-Version + ein gemeinsames Rechnungsmodell `EbInvoice` + Mapper in beide R
   Hinweis: 4.3 importiert `ebInterfaceExtension.xsd`, `ext/ebInterfaceExtension_SV.xsd` und das W3C-xmldsig-Schema
   (per URL) – für 4.3 muss das xmldsig-Schema lokal eingebettet werden. 5.0/6.0/6.1 sind in sich geschlossen.
 - **Bundesregeln (Primärquelle):** https://www.erechnung.gv.at/erb/tec_formats_ebinterface
+- **Auftragsreferenzen Bund:** https://www.erechnung.gv.at/go/orderref_fedgov und
+  https://www.erechnung.gv.at/go/orderref_others
+- **Einkäufergruppen-Liste:** https://www.erechnung.gv.at/go/ekgrlist-excel – nur Referenz, nicht einbetten;
+  Lizenz und Aktualisierungen sind ungeklärt.
+- **Offizielle Bund-Schemas:** https://www.erechnung.gv.at/files/xsd/ebinterface-6.1-bund.xsd
+  sowie die Varianten für 6.0, 5.0 und 4.3 – nur lokal als Referenz vergleichen, nicht einbetten oder committen.
+  Die Dateien enthalten Änderungen mit `[CHANGE]` und den Hinweis `Copyright BRZ GmbH – All rights reserved`.
+- **Offizielle Bund-Beispiele:** https://www.erechnung.gv.at/files/xml/example-ebi61.xml sowie die Varianten
+  für 6.0, 5.0 und 4.3 – nur Referenz, nicht ins Repository übernehmen; eigene Testdaten nach diesem Vorbild
+  unter `tests/EbInterface.Net.Tests/TestData/` anlegen.
+- **Endgültiger Test:** https://test.erechnung.gv.at/go/test_upload (USP-Zugang erforderlich).
 - **Referenzimplementierung .NET (archiviert, MIT, (c) 2015 AUSTRIAPRO):**
   https://github.com/austriapro/ebinterface-word-plugin – besonders
   `eRechnungWordPlugIn/ebIModels/Models/erbInvoiceValidation.cs` (Bundesregeln mit Fehlercodes),
@@ -67,18 +78,48 @@ Schema-Version + ein gemeinsames Rechnungsmodell `EbInvoice` + Mapper in beide R
 - **7.0:** https://github.com/austriapro/ebi7 und Forum https://www.ebinterface.org/forum/ (Bereich "ebInterface 7.0").
 - AUSTRIAPRO veröffentlicht **kein** Schematron; die Prüfung läuft über das XSD plus eigene Regeln.
 
-## Bekannte Bundesregeln (aus e-Rechnung.gv.at, vor Umsetzung gegen Primärquelle prüfen)
+## Bundesregeln (e-Rechnung.gv.at, Stand 2026-09-25)
 
 - Akzeptierte Versionen: 4.3, 5.0, 6.0, 6.1. 4.0–4.2 seit April 2022 nicht mehr, 3.x seit Jänner 2016 nicht mehr.
 - Eine Rechnung darf sich nur auf **eine** Bestellung beziehen.
 - `DocumentType` nur: Invoice, InvoiceForAdvancePayment, InvoiceForPartialDelivery, FinalSettlement, CreditMemo.
-- `InvoiceRecipient/OrderReference/OrderID` ist Pflicht (Auftragsreferenz).
-- Ist Empfänger der Bund und die Auftragsreferenz eine Bestellnummer (10-stellig numerisch), muss jede Zeile
-  eine passende Bestellpositionsnummer in `InvoiceRecipientsOrderReference/OrderPositionNumber` haben (numerisch).
-- Firmensitz (§ 14 UGB) in `/Invoice/Biller/FurtherIdentification` mit `IdentificationType="FS"`.
-- `BaseQuantity` wird nicht ausgewertet; ergibt die Division von Quantity oder UnitPrice durch BaseQuantity
-  mehr als 4 Nachkommastellen, wird die Rechnung abgelehnt.
-- `PrepaidAmount` wird nicht ausgewertet, `TotalGrossAmount` weder geprüft noch ausgewertet; nur `PayableAmount` wird validiert.
+- `InvoiceRecipient/OrderReference/OrderID` ist Pflicht. Die Auftragsreferenz wird ausschließlich anhand ihres
+  Formats klassifiziert:
+  - Bund-Bestellnummer: genau zehn Ziffern; dann braucht jede `ListLineItem` eine passende numerische
+    `InvoiceRecipientsOrderReference/OrderPositionNumber` und dieselbe `OrderID`.
+  - Einkäufergruppe (EKG): genau drei alphanumerische Zeichen, einschließlich Unicode-Buchstaben wie `Ü`;
+    unbekannte EKGs werden nicht abgelehnt.
+  - EKG-Referenz: drei alphanumerische Zeichen, Doppelpunkt und höchstens 50 weitere Zeichen.
+  - Andere Empfänger: mindestens zwei alphanumerische Zeichen, ein verpflichtender `/` und optional höchstens
+    50 weitere Zeichen, z. B. `Z0/` oder `Z0/Aktenzahl`.
+  - Enthält die Referenz `/`, gilt sie als anderer Empfänger; andere Formate sind ungültig.
+- Ob eine Bestellnummer oder EKG tatsächlich existiert, ist offline nicht prüfbar.
+- `Biller/InvoiceRecipientsBillerID` ist Pflicht; die Lieferantennummer wird nur auf Vorhandensein geprüft,
+  nicht auf eine feste Länge.
+- Im `Biller` ist mindestens eine E-Mail-Adresse Pflicht.
+- Maximal eine Bestellung pro Rechnung.
+- Firmendaten nach § 14 UGB in `/Invoice/Biller/FurtherIdentification`: `FS` (Firmensitz), `FN`
+  (Firmenbuchnummer) und `FBG` (Firmenbuchgericht) sind erforderlich.
+- Maximal 999 Rechnungs- und/oder `BelowTheLineItem`-Zeilen.
+- Skonto-Prozentsatz größer 0 und kleiner 100; maximal zwei `Discount`-Elemente.
+- `UniversalBankTransaction`: genau ein `BeneficiaryAccount`; Überweisung nur mit IBAN.
+- `PaymentCard` und `OtherPayment` werden nicht unterstützt.
+- Rechnungen brauchen `UniversalBankTransaction`, `SEPADirectDebit` oder `NoPayment`; Gutschriften brauchen
+  diese Zahlungsart nicht.
+- `SEPADirectDebit`: `Type`, `IBAN`, `BankAccountOwner`, `CreditorID`, `MandateReference` und
+  `DebitCollectionDate` sind Pflicht.
+- `PaymentConditions/DueDate` darf höchstens 999 Tage in der Zukunft liegen.
+- `NoPayment` nur bei Gutschriften und 0-Euro-Rechnungen.
+- `Delivery/Comment` darf höchstens 500 Zeichen enthalten.
+- `MinimumPayment`, `ListLineItem/DiscountFlag` und `PrepaidAmount` werden nicht ausgewertet.
+- `TotalGrossAmount` wird weder geprüft noch ausgewertet; nur `PayableAmount` wird validiert.
+- Bei `BaseQuantity` muss die Division von `Quantity` beziehungsweise `UnitPrice` durch `BaseQuantity`
+  höchstens vier Nachkommastellen ergeben; sonst wird die Rechnung abgelehnt.
+- `TradingName`, alle `AddressExtension`-Elemente und alle Erweiterungselemente werden ignoriert.
+
+Für 6.0, 5.0 und 4.3 gibt es eigene Regellisten mit kleinen Unterschieden. Beispielsweise ist in 4.3
+`DirectDebit` erlaubt; `ListLineItem/AdditionalInformation` und `PresentationDetails` werden dort nicht
+ausgewertet. Die jeweiligen Primärquellen sind vor der Umsetzung abzugleichen.
 
 ## Arbeitsweise
 
@@ -102,11 +143,11 @@ dotnet pack src/EbInterface.Net -c Release -o artifacts
 
 ## Stand und nächste Schritte
 
-Erledigt: Versionserkennung (4.3–6.1), XSD-Prüfung 5.0/6.0/6.1, XXE-Schutz, Tests gegen offizielle Beispiele, CI.
+Erledigt: Versionserkennung (4.3–6.1), XSD-Prüfung 5.0/6.0/6.1, XXE-Schutz, erste ERB-Regeln,
+Tests gegen offizielle Beispiele, CI.
 
 Als Nächstes, in dieser Reihenfolge:
-1. Prüfstufe 4 (Bundesregeln, Codes `ERB-xx`) – Regeln aus e-Rechnung.gv.at und erbInvoiceValidation.cs,
-   zunächst direkt auf dem XML (XPath/XDocument), bevor das Modell existiert.
+1. Verbleibende Bundesregeln aus den versionseigenen Primärquellen umsetzen.
 2. Deutsche, verständliche Texte für die häufigsten XSD-Fehler (statt der englischen .NET-Meldungen).
 3. XSD-Prüfung für 4.3 (xmldsig-Schema lokal einbetten).
 4. Rechnungsmodell `EbInvoice` + Reader für 5.0/6.0/6.1.

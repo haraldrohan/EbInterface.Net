@@ -12,3 +12,4 @@ Alle wesentlichen Änderungen werden hier dokumentiert. Das Format folgt [Keep a
 - Erste Bundesregeln von e-Rechnung.gv.at: zulässige Dokumenttypen und Empfänger-Auftragsreferenz.
 - Prüfung des Firmensitzes des Rechnungsstellers über `FurtherIdentification` mit `IdentificationType="FS"`.
 - Prüfung der maximal vier Nachkommastellen bei Division durch `BaseQuantity`.
+- Prüfung der Auftragsreferenzformate, der Bundespositionsnummern sowie von Lieferantennummer und Biller-E-Mail.
