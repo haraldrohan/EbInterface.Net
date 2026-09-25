@@ -88,7 +88,8 @@ Grundsätze dazu:
   erzeugt die Warnung ERB-09, weil dort FS/FN/FBG fehlen (Stand 2026-09-25) – nach Regeländerungen lokal erneut prüfen.
 - **Einkäufergruppen-Liste** (https://www.erechnung.gv.at/go/ekgrlist-excel): **nur Referenz, nicht einbetten**
   (Lizenz ungeklärt, ändert sich).
-- **Endgültiger Test:** https://test.erechnung.gv.at/go/test_upload (USP-Zugang, von Harald beantragt).
+- **Endgültiger Test:** https://test.erechnung.gv.at/go/test_upload – ohne Anmeldung, ohne USP (geprüft 2026-09-25).
+  Nur eigene Testrechnungen hochladen, keine echten Rechnungsdaten.
 - **Referenzimplementierung .NET (archiviert, MIT, (c) 2015 AUSTRIAPRO):**
   https://github.com/austriapro/ebinterface-word-plugin – u. a. `ebIModels/Models/erbInvoiceValidation.cs`,
   `ebIValidation/Validation/*` (IBAN, BIC, UID, GLN). Deckt 4.0–5.0 ab. **Neu schreiben, nicht forken.** Wo Code oder
@@ -125,7 +126,7 @@ Erledigt: Versionserkennung (4.3–6.1), XSD-Prüfung 4.3–6.1 mit deutschen Me
 e-Rechnung.gv.at (ERB-01 bis ERB-38), eigene Testdaten, CI.
 
 Als Nächstes, in dieser Reihenfolge:
-1. Offene fachliche Punkte klären, sobald der Test-Upload verfügbar ist: Was prüft e-Rechnung.gv.at an
+1. Offene fachliche Punkte mit dem Test-Upload klären: Was prüft e-Rechnung.gv.at an
    `PayableAmount`? Zählt „999 Rechnungs- und/oder Below-The-Line-Zeilen“ zusammen oder getrennt? Welche
    Zeilen-`OrderID` gilt bei anderen Empfängern als „andere Bestellung“?
 2. Rechnungsmodell `EbInvoice` + Reader für 5.0/6.0/6.1.
