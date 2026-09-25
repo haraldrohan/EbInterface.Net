@@ -1,0 +1,3 @@
+[submodule "external/ebinterface-standards"]
+	path = external/ebinterface-standards
+	url = https://github.com/austriapro/ebinterface-standards.git

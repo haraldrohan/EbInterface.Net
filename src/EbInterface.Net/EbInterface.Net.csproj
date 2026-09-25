@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- netstandard2.0 deckt .NET Framework 4.6.1+ ab, net8.0 modernes .NET -->
+    <TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
+    <RootNamespace>EbInterface</RootNamespace>
+    <AssemblyName>EbInterface.Net</AssemblyName>
+
+    <PackageId>EbInterface.Net</PackageId>
+    <Version>0.1.0-alpha</Version>
+    <Description>Unabhängige .NET-Implementierung des österreichischen E-Rechnungsstandards ebInterface: Lesen, Schreiben und Prüfen inkl. der Regeln von e-Rechnung.gv.at. Nicht offiziell von AUSTRIAPRO herausgegeben.</Description>
+    <PackageTags>ebinterface;e-invoice;e-rechnung;einvoicing;austria;oesterreich;en16931;xml</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Offizielle Schemas (AUSTRIAPRO) aus dem Submodule, eingebettet als Ressourcen.
+         Siehe THIRD-PARTY-NOTICES.md. ebInterface 4.3 folgt (benötigt xmldsig-Schema). -->
+    <EmbeddedResource Include="$(EbInterfaceStandardsDir)schemas/ebInterface5p0/Invoice.xsd" LogicalName="EbInterface.Schemas.5p0.Invoice.xsd" />
+    <EmbeddedResource Include="$(EbInterfaceStandardsDir)schemas/ebInterface6p0/Invoice.xsd" LogicalName="EbInterface.Schemas.6p0.Invoice.xsd" />
+    <EmbeddedResource Include="$(EbInterfaceStandardsDir)schemas/ebInterface6p1/Invoice.xsd" LogicalName="EbInterface.Schemas.6p1.Invoice.xsd" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="/" />
+    <None Include="../../THIRD-PARTY-NOTICES.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+  </ItemGroup>
+
+</Project>

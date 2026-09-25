@@ -1,0 +1,13 @@
+<Project>
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <Authors>Harald [Nachname]</Authors>
+    <Copyright>Copyright (c) 2026 Harald [Nachname]</Copyright>
+    <RepositoryUrl>https://github.com/[github-user]/EbInterface.Net</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <!-- Pfad zum Submodule mit den offiziellen Schemas von AUSTRIAPRO -->
+    <EbInterfaceStandardsDir>$(MSBuildThisFileDirectory)external/ebinterface-standards/</EbInterfaceStandardsDir>
+  </PropertyGroup>
+</Project>
