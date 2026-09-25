@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Eigene Testrechnung (MIT, EbInterface.Net): anderer Empfänger mit Empfängeridentifikation und interner Referenz. -->
+<Invoice xmlns="http://www.ebinterface.at/schema/6p1/" GeneratingSystem="EbInterface.Net Tests" DocumentType="Invoice" InvoiceCurrency="EUR" Language="de">
+  <InvoiceNumber>T-2026-0001</InvoiceNumber>
+  <InvoiceDate>2026-09-01</InvoiceDate>
+  <Delivery>
+    <Date>2026-08-28</Date>
+  </Delivery>
+  <Biller>
+    <VATIdentificationNumber>ATU12345678</VATIdentificationNumber>
+    <FurtherIdentification IdentificationType="FS">Linz</FurtherIdentification>
+    <FurtherIdentification IdentificationType="FN">123456a</FurtherIdentification>
+    <FurtherIdentification IdentificationType="FBG">Landesgericht Linz</FurtherIdentification>
+    <Address>
+      <Name>Beispiel Handels GmbH</Name>
+      <Street>Musterweg 1</Street>
+      <Town>Linz</Town>
+      <ZIP>4020</ZIP>
+      <Country CountryCode="AT">Österreich</Country>
+      <Email>rechnung@example.org</Email>
+    </Address>
+    <InvoiceRecipientsBillerID>50012345</InvoiceRecipientsBillerID>
+  </Biller>
+  <InvoiceRecipient>
+    <VATIdentificationNumber>ATU00000000</VATIdentificationNumber>
+    <OrderReference>
+      <OrderID>Z0/Aktenzahl 2026-123</OrderID>
+    </OrderReference>
+    <Address>
+      <Name>Beispielgemeinde</Name>
+      <Street>Amtsplatz 1</Street>
+      <Town>Wien</Town>
+      <ZIP>1010</ZIP>
+      <Country CountryCode="AT">Österreich</Country>
+    </Address>
+  </InvoiceRecipient>
+  <Details>
+    <ItemList>
+      <ListLineItem>
+        <Description>Druckerpapier A4, 500 Blatt</Description>
+        <Quantity Unit="STK">20</Quantity>
+        <UnitPrice>4.50</UnitPrice>
+        <TaxItem>
+          <TaxableAmount>90.00</TaxableAmount>
+          <TaxPercent TaxCategoryCode="S">20</TaxPercent>
+        </TaxItem>
+        <LineItemAmount>90.00</LineItemAmount>
+      </ListLineItem>
+      <ListLineItem>
+        <Description>Toner schwarz</Description>
+        <Quantity Unit="STK">2</Quantity>
+        <UnitPrice>55.00</UnitPrice>
+        <TaxItem>
+          <TaxableAmount>110.00</TaxableAmount>
+          <TaxPercent TaxCategoryCode="S">20</TaxPercent>
+        </TaxItem>
+        <LineItemAmount>110.00</LineItemAmount>
+      </ListLineItem>
+    </ItemList>
+  </Details>
+  <Tax>
+    <TaxItem>
+      <TaxableAmount>200.00</TaxableAmount>
+      <TaxPercent TaxCategoryCode="S">20</TaxPercent>
+      <TaxAmount>40.00</TaxAmount>
+    </TaxItem>
+  </Tax>
+  <TotalGrossAmount>240.00</TotalGrossAmount>
+  <PayableAmount>240.00</PayableAmount>
+  <PaymentMethod>
+    <UniversalBankTransaction>
+      <BeneficiaryAccount>
+        <IBAN>AT611904300234573201</IBAN>
+        <BankAccountOwner>Beispiel Handels GmbH</BankAccountOwner>
+      </BeneficiaryAccount>
+    </UniversalBankTransaction>
+  </PaymentMethod>
+  <PaymentConditions>
+    <DueDate>2026-10-01</DueDate>
+    <Discount>
+      <PaymentDate>2026-09-15</PaymentDate>
+      <Percentage>2.00</Percentage>
+    </Discount>
+  </PaymentConditions>
+</Invoice>

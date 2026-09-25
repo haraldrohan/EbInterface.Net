@@ -14,7 +14,7 @@ namespace EbInterface.Validation
     public sealed class ValidationMessage
     {
         /// <summary>Erstellt eine Prüfmeldung.</summary>
-        public ValidationMessage(ValidationSeverity severity, string code, string message, int line = 0, int position = 0)
+        internal ValidationMessage(ValidationSeverity severity, string code, string message, int line = 0, int position = 0)
         {
             Severity = severity;
             Code = code;

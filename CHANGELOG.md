@@ -5,16 +5,9 @@ Alle wesentlichen Änderungen werden hier dokumentiert. Das Format folgt [Keep a
 ## [Unveröffentlicht]
 
 ### Hinzugefügt
-- Erkennung der ebInterface-Version 4.3, 5.0, 6.0 und 6.1 anhand des Namespace.
+- Erkennung der ebInterface-Version 4.3, 5.0, 6.0 und 6.1 anhand des Namespace; ältere Versionen werden als nicht unterstützt gemeldet (`VER-03`).
 - Schema-Prüfung (XSD) für 5.0, 6.0 und 6.1 mit Zeilen- und Spaltenangabe.
 - Sicheres Einlesen ohne DTD-Verarbeitung (XXE-Schutz).
-- Tests gegen die offiziellen Beispielrechnungen von AUSTRIAPRO.
-- Erste Bundesregeln von e-Rechnung.gv.at: zulässige Dokumenttypen und Empfänger-Auftragsreferenz.
-- Prüfung des Firmensitzes des Rechnungsstellers über `FurtherIdentification` mit `IdentificationType="FS"`.
-- Prüfung der maximal vier Nachkommastellen bei Division durch `BaseQuantity`.
-- Prüfung der Auftragsreferenzformate, der Bundespositionsnummern sowie von Lieferantennummer und Biller-E-Mail.
-- Prüfung der maximal 999 Rechnungszeilen sowie der Anzahl und Grenzen von Skonto-Elementen.
-- Prüfung unterstützter Zahlungsarten sowie der Konten- und IBAN-Regeln für Überweisungen.
-- Prüfung der Pflichtfelder für SEPA-Lastschriften.
-- Prüfung von Fälligkeitsdatum und `NoPayment`-Voraussetzungen.
-- Prüfung der maximalen Länge von Lieferbeschreibungen.
+- Prüfprofil `ValidationProfile.ERechnungGvAt` mit den Regeln von e-Rechnung.gv.at für 5.0, 6.0 und 6.1 (`ERB-01` bis `ERB-38`), darunter Auftragsreferenzen für Bund und andere Empfänger, Bestellpositionsnummern, Zahlungsarten, Skonto, Zeilenanzahl und `BaseQuantity`. Übersicht in `docs/pruefregeln.md`.
+- `ValidationOptions.ReferenceDate` als Stichtag für datumsabhängige Regeln.
+- Tests gegen die offiziellen Beispielrechnungen von AUSTRIAPRO und eigene Testrechnungen.

@@ -12,7 +12,7 @@ Frühe Entwicklungsphase (`0.1.0-alpha`). Die API kann sich noch ändern.
 |---|---|---|---|---|---|
 | Versionserkennung | ✅ | ✅ | ✅ | ✅ | geplant |
 | Schema-Prüfung (XSD) | geplant | ✅ | ✅ | ✅ | geplant |
-| Regeln von e-Rechnung.gv.at | – | geplant | geplant | geplant | geplant |
+| Regeln von e-Rechnung.gv.at | geplant | ✅ | ✅ | ✅ | geplant |
 | Lesen in ein Modell | – | geplant | geplant | geplant | geplant |
 | Schreiben | – | – | geplant | geplant | geplant |
 | Versions-Upgrade | geplant | geplant | geplant | – | – |
@@ -28,17 +28,26 @@ Unterstützt .NET Standard 2.0 (damit auch .NET Framework ab 4.6.1) und .NET 8. 
 ## Verwendung
 
 ```csharp
+using EbInterface;
 using EbInterface.Validation;
 
+// Nur der ebInterface-Standard (XML, Version, Schema) – z. B. für Rechnungen an Unternehmen:
 var result = EbInterfaceValidator.ValidateFile("rechnung.xml");
 
+// Zusätzlich die Regeln von e-Rechnung.gv.at – für Rechnungen an Bund, Länder und Gemeinden:
+result = EbInterfaceValidator.ValidateFile("rechnung.xml",
+    new ValidationOptions { Profile = ValidationProfile.ERechnungGvAt });
+
 Console.WriteLine($"Version: {result.Version.ToDisplayString()}");
-if (!result.IsValid)
-{
-    foreach (var error in result.Errors)
-        Console.WriteLine(error);   // [XSD-01] Zeile 12, Spalte 4: Verstoß gegen das Schema ...
-}
+foreach (var message in result.Messages)
+    Console.WriteLine(message);   // [ERB-05] Zeile 42, Spalte 8: Bei einer Bestellnummer des Bundes ...
 ```
+
+`IsValid` ist `true`, solange es keine Fehler gibt. Warnungen stehen zusätzlich in `Messages`, zum Beispiel für
+Felder, die e-Rechnung.gv.at nicht auswertet. Alle Codes und Regeln stehen in [docs/pruefregeln.md](docs/pruefregeln.md).
+
+Die Bibliothek prüft vollständig lokal und baut keine Netzwerkverbindungen auf. Den endgültigen Nachweis liefert der
+[Test-Upload von e-Rechnung.gv.at](https://test.erechnung.gv.at/go/test_upload).
 
 ## Entwicklung
 

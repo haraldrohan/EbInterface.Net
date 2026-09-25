@@ -25,8 +25,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Offizielle Beispielrechnungen aus dem Submodule als Testdaten -->
+    <!-- Offizielle Beispielrechnungen aus dem Submodule und eigene Testdaten -->
     <None Include="$(EbInterfaceStandardsDir)schemas/**/samples/*.xml" LinkBase="standards" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="TestData/**/*.xml" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
