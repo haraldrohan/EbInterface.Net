@@ -56,6 +56,8 @@ namespace EbInterface.Validation
             ValidateBillerEmail(invoice, ns, messages);
             ValidateLineAndDiscountLimits(invoice, ns, messages);
             ValidatePaymentMethod(invoice, ns, messages);
+            ValidateDueDate(invoice, ns, messages);
+            ValidateNoPayment(invoice, ns, messages);
         }
 
         private static void ValidateDocumentType(XElement invoice, IList<ValidationMessage> messages)
@@ -365,6 +367,64 @@ namespace EbInterface.Validation
                             GetPosition(payment)));
                     }
                 }
+            }
+        }
+
+        private static void ValidateDueDate(
+            XElement invoice,
+            XNamespace ns,
+            IList<ValidationMessage> messages)
+        {
+            XElement? dueDate = invoice.Element(ns + "PaymentConditions")?.Element(ns + "DueDate");
+            if (dueDate == null ||
+                !DateTime.TryParseExact(
+                    dueDate.Value.Trim(),
+                    "yyyy-MM-dd",
+                    CultureInfo.InvariantCulture,
+                    System.Globalization.DateTimeStyles.None,
+                    out DateTime date))
+            {
+                return;
+            }
+
+            if (date.Date > DateTime.UtcNow.Date.AddDays(999))
+            {
+                messages.Add(new ValidationMessage(
+                    ValidationSeverity.Error,
+                    "ERB-16",
+                    "Das Fälligkeitsdatum darf höchstens 999 Tage in der Zukunft liegen.",
+                    GetLine(dueDate),
+                    GetPosition(dueDate)));
+            }
+        }
+
+        private static void ValidateNoPayment(
+            XElement invoice,
+            XNamespace ns,
+            IList<ValidationMessage> messages)
+        {
+            XElement? noPayment = invoice.Element(ns + "PaymentMethod")?.Element(ns + "NoPayment");
+            if (noPayment == null)
+            {
+                return;
+            }
+
+            string documentType = invoice.Attribute("DocumentType")?.Value ?? string.Empty;
+            XElement? payableAmount = invoice.Element(ns + "PayableAmount");
+            bool isZeroAmount = decimal.TryParse(
+                payableAmount?.Value,
+                NumberStyles.Number,
+                CultureInfo.InvariantCulture,
+                out decimal amount) && amount == 0;
+
+            if (!string.Equals(documentType, "CreditMemo", StringComparison.Ordinal) && !isZeroAmount)
+            {
+                messages.Add(new ValidationMessage(
+                    ValidationSeverity.Error,
+                    "ERB-17",
+                    "NoPayment ist nur bei Gutschriften oder Rechnungen mit 0-Euro-Betrag zulässig.",
+                    GetLine(noPayment),
+                    GetPosition(noPayment)));
             }
         }
 

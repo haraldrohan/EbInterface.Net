@@ -314,6 +314,53 @@ namespace EbInterface.Tests
             Assert.DoesNotContain(result.Errors, message => message.Code == "ERB-15");
         }
 
+        [Fact]
+        public void DueDateMoreThan999DaysInFuture_ReportsErbCode()
+        {
+            var document = XDocument.Load(SamplePath);
+            XElement invoice = document.Root ?? throw new InvalidOperationException();
+            XNamespace ns = invoice.Name.Namespace;
+            XElement paymentConditions = invoice.Element(ns + "PaymentConditions") ?? throw new InvalidOperationException();
+            XElement dueDate = paymentConditions.Element(ns + "DueDate") ?? throw new InvalidOperationException();
+            dueDate.Value = DateTime.UtcNow.Date.AddDays(1000).ToString("yyyy-MM-dd");
+
+            var result = Validate(document);
+
+            Assert.Contains(result.Errors, message => message.Code == "ERB-16");
+        }
+
+        [Fact]
+        public void NoPaymentWithNonzeroInvoice_ReportsErbCode()
+        {
+            var document = XDocument.Load(SamplePath);
+            XElement invoice = document.Root ?? throw new InvalidOperationException();
+            XNamespace ns = invoice.Name.Namespace;
+            XElement paymentMethod = invoice.Element(ns + "PaymentMethod") ?? throw new InvalidOperationException();
+            paymentMethod.RemoveNodes();
+            paymentMethod.Add(new XElement(ns + "NoPayment"));
+
+            var result = Validate(document);
+
+            Assert.Contains(result.Errors, message => message.Code == "ERB-17");
+        }
+
+        [Fact]
+        public void NoPaymentWithZeroInvoice_IsAccepted()
+        {
+            var document = XDocument.Load(SamplePath);
+            XElement invoice = document.Root ?? throw new InvalidOperationException();
+            XNamespace ns = invoice.Name.Namespace;
+            XElement payableAmount = invoice.Element(ns + "PayableAmount") ?? throw new InvalidOperationException();
+            payableAmount.Value = "0";
+            XElement paymentMethod = invoice.Element(ns + "PaymentMethod") ?? throw new InvalidOperationException();
+            paymentMethod.RemoveNodes();
+            paymentMethod.Add(new XElement(ns + "NoPayment"));
+
+            var result = Validate(document);
+
+            Assert.DoesNotContain(result.Errors, message => message.Code == "ERB-17");
+        }
+
         private static ValidationResult Validate(XDocument document)
         {
             using var stream = new MemoryStream();
