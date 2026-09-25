@@ -13,3 +13,4 @@ Alle wesentlichen Änderungen werden hier dokumentiert. Das Format folgt [Keep a
 - Prüfung des Firmensitzes des Rechnungsstellers über `FurtherIdentification` mit `IdentificationType="FS"`.
 - Prüfung der maximal vier Nachkommastellen bei Division durch `BaseQuantity`.
 - Prüfung der Auftragsreferenzformate, der Bundespositionsnummern sowie von Lieferantennummer und Biller-E-Mail.
+- Prüfung der maximal 999 Rechnungszeilen sowie der Anzahl und Grenzen von Skonto-Elementen.

@@ -54,6 +54,7 @@ namespace EbInterface.Validation
             ValidateBaseQuantityPrecision(invoice, ns, messages);
             ValidateSupplierNumber(invoice, ns, messages);
             ValidateBillerEmail(invoice, ns, messages);
+            ValidateLineAndDiscountLimits(invoice, ns, messages);
         }
 
         private static void ValidateDocumentType(XElement invoice, IList<ValidationMessage> messages)
@@ -221,6 +222,56 @@ namespace EbInterface.Validation
                     "Im Biller muss mindestens eine E-Mail-Adresse angegeben werden.",
                     GetLine(biller ?? invoice),
                     GetPosition(biller ?? invoice)));
+            }
+        }
+
+        private static void ValidateLineAndDiscountLimits(
+            XElement invoice,
+            XNamespace ns,
+            IList<ValidationMessage> messages)
+        {
+            int lineCount = invoice.Descendants(ns + "ListLineItem").Count() +
+                invoice.Descendants(ns + "BelowTheLineItem").Count();
+            if (lineCount > 999)
+            {
+                messages.Add(new ValidationMessage(
+                    ValidationSeverity.Error,
+                    "ERB-08",
+                    "Eine Rechnung darf höchstens 999 Rechnungs- und BelowTheLine-Zeilen enthalten.",
+                    GetLine(invoice),
+                    GetPosition(invoice)));
+            }
+
+            XElement? paymentConditions = invoice.Element(ns + "PaymentConditions");
+            IList<XElement> discounts = paymentConditions?
+                .Elements(ns + "Discount")
+                .ToList() ?? new List<XElement>();
+
+            if (discounts.Count > 2)
+            {
+                messages.Add(new ValidationMessage(
+                    ValidationSeverity.Error,
+                    "ERB-09",
+                    "Eine Rechnung darf höchstens zwei Discount-Elemente enthalten.",
+                    GetLine(paymentConditions ?? invoice),
+                    GetPosition(paymentConditions ?? invoice)));
+            }
+
+            foreach (XElement discount in discounts)
+            {
+                XElement? percentageElement = discount.Element(ns + "Percentage");
+                if (percentageElement == null ||
+                    !decimal.TryParse(percentageElement.Value, NumberStyles.Number, CultureInfo.InvariantCulture, out decimal percentage) ||
+                    percentage <= 0 ||
+                    percentage >= 100)
+                {
+                    messages.Add(new ValidationMessage(
+                        ValidationSeverity.Error,
+                        "ERB-10",
+                        "Der Skonto-Prozentsatz muss größer als 0 und kleiner als 100 sein.",
+                        GetLine(discount),
+                        GetPosition(discount)));
+                }
             }
         }
 

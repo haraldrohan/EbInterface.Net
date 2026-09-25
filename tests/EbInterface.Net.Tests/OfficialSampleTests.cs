@@ -182,6 +182,61 @@ namespace EbInterface.Tests
             Assert.DoesNotContain(result.Errors, message => message.Code == "ERB-04");
         }
 
+        [Fact]
+        public void MoreThan999Lines_ReportsErbCode()
+        {
+            var document = XDocument.Load(SamplePath);
+            XElement invoice = document.Root ?? throw new InvalidOperationException();
+            XNamespace ns = invoice.Name.Namespace;
+            XElement itemList = invoice.Descendants(ns + "ItemList").First();
+            XElement line = itemList.Element(ns + "ListLineItem") ?? throw new InvalidOperationException();
+            for (int index = 0; index < 998; index++)
+            {
+                itemList.Add(new XElement(line));
+            }
+
+            var result = Validate(document);
+
+            Assert.Contains(result.Errors, message => message.Code == "ERB-08");
+        }
+
+        [Fact]
+        public void MoreThanTwoDiscounts_ReportsErbCode()
+        {
+            var document = XDocument.Load(SamplePath);
+            XElement invoice = document.Root ?? throw new InvalidOperationException();
+            XNamespace ns = invoice.Name.Namespace;
+            XElement paymentConditions = invoice.Element(ns + "PaymentConditions") ?? throw new InvalidOperationException();
+            for (int index = 0; index < 3; index++)
+            {
+                paymentConditions.Add(new XElement(
+                    ns + "Discount",
+                    new XElement(ns + "PaymentDate", "2026-01-01"),
+                    new XElement(ns + "Percentage", "3")));
+            }
+
+            var result = Validate(document);
+
+            Assert.Contains(result.Errors, message => message.Code == "ERB-09");
+        }
+
+        [Fact]
+        public void InvalidDiscountPercentage_ReportsErbCode()
+        {
+            var document = XDocument.Load(SamplePath);
+            XElement invoice = document.Root ?? throw new InvalidOperationException();
+            XNamespace ns = invoice.Name.Namespace;
+            XElement paymentConditions = invoice.Element(ns + "PaymentConditions") ?? throw new InvalidOperationException();
+            paymentConditions.Add(new XElement(
+                ns + "Discount",
+                new XElement(ns + "PaymentDate", "2026-01-01"),
+                new XElement(ns + "Percentage", "100")));
+
+            var result = Validate(document);
+
+            Assert.Contains(result.Errors, message => message.Code == "ERB-10");
+        }
+
         private static ValidationResult Validate(XDocument document)
         {
             using var stream = new MemoryStream();
