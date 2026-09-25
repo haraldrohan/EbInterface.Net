@@ -361,6 +361,26 @@ namespace EbInterface.Tests
             Assert.DoesNotContain(result.Errors, message => message.Code == "ERB-17");
         }
 
+        [Fact]
+        public void DeliveryDescriptionLongerThan500Characters_ReportsErbCode()
+        {
+            var document = XDocument.Load(Path.Combine(
+                AppContext.BaseDirectory,
+                "standards",
+                "ebInterface6p1",
+                "samples",
+                "ebinterface_6p1_sample_ecosio.xml"));
+            XElement invoice = document.Root ?? throw new InvalidOperationException();
+            XNamespace ns = invoice.Name.Namespace;
+            XElement delivery = invoice.Descendants(ns + "Delivery").First();
+            XElement description = delivery.Element(ns + "Description") ?? throw new InvalidOperationException();
+            description.Value = new string('x', 501);
+
+            var result = Validate(document);
+
+            Assert.Contains(result.Errors, message => message.Code == "ERB-18");
+        }
+
         private static ValidationResult Validate(XDocument document)
         {
             using var stream = new MemoryStream();

@@ -58,6 +58,7 @@ namespace EbInterface.Validation
             ValidatePaymentMethod(invoice, ns, messages);
             ValidateDueDate(invoice, ns, messages);
             ValidateNoPayment(invoice, ns, messages);
+            ValidateDeliveryComments(invoice, ns, messages);
         }
 
         private static void ValidateDocumentType(XElement invoice, IList<ValidationMessage> messages)
@@ -425,6 +426,29 @@ namespace EbInterface.Validation
                     "NoPayment ist nur bei Gutschriften oder Rechnungen mit 0-Euro-Betrag zulässig.",
                     GetLine(noPayment),
                     GetPosition(noPayment)));
+            }
+        }
+
+        private static void ValidateDeliveryComments(
+            XElement invoice,
+            XNamespace ns,
+            IList<ValidationMessage> messages)
+        {
+            foreach (XElement delivery in invoice.Descendants(ns + "Delivery"))
+            {
+                foreach (XElement comment in delivery.Elements()
+                    .Where(element => element.Name == ns + "Comment" || element.Name == ns + "Description"))
+                {
+                    if (comment.Value.Length > 500)
+                    {
+                        messages.Add(new ValidationMessage(
+                            ValidationSeverity.Error,
+                            "ERB-18",
+                            "Die Beschreibung der Lieferung darf höchstens 500 Zeichen enthalten.",
+                            GetLine(comment),
+                            GetPosition(comment)));
+                    }
+                }
             }
         }
 

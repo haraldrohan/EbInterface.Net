@@ -17,3 +17,4 @@ Alle wesentlichen Änderungen werden hier dokumentiert. Das Format folgt [Keep a
 - Prüfung unterstützter Zahlungsarten sowie der Konten- und IBAN-Regeln für Überweisungen.
 - Prüfung der Pflichtfelder für SEPA-Lastschriften.
 - Prüfung von Fälligkeitsdatum und `NoPayment`-Voraussetzungen.
+- Prüfung der maximalen Länge von Lieferbeschreibungen.
