@@ -11,3 +11,4 @@ Alle wesentlichen Änderungen werden hier dokumentiert. Das Format folgt [Keep a
 - Tests gegen die offiziellen Beispielrechnungen von AUSTRIAPRO.
 - Erste Bundesregeln von e-Rechnung.gv.at: zulässige Dokumenttypen und Empfänger-Auftragsreferenz.
 - Prüfung des Firmensitzes des Rechnungsstellers über `FurtherIdentification` mit `IdentificationType="FS"`.
+- Prüfung der maximal vier Nachkommastellen bei Division durch `BaseQuantity`.

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Xml;
@@ -29,6 +30,7 @@ namespace EbInterface.Validation
             ValidateDocumentType(invoice, messages);
             ValidateRecipientOrderReference(invoice, ns, messages);
             ValidateBillerRegisteredOffice(invoice, ns, messages);
+            ValidateBaseQuantityPrecision(invoice, ns, messages);
         }
 
         private static void ValidateDocumentType(XElement invoice, IList<ValidationMessage> messages)
@@ -92,6 +94,41 @@ namespace EbInterface.Validation
                     GetLine(biller ?? invoice),
                     GetPosition(biller ?? invoice)));
             }
+        }
+
+        private static void ValidateBaseQuantityPrecision(
+            XElement invoice,
+            XNamespace ns,
+            IList<ValidationMessage> messages)
+        {
+            foreach (XElement amount in invoice.Descendants().Where(element =>
+                element.Name == ns + "Quantity" || element.Name == ns + "UnitPrice"))
+            {
+                string baseQuantityText = amount.Attribute("BaseQuantity")?.Value ?? string.Empty;
+                if (!decimal.TryParse(baseQuantityText, NumberStyles.Number, CultureInfo.InvariantCulture, out decimal baseQuantity) ||
+                    baseQuantity == 0 ||
+                    !decimal.TryParse(amount.Value, NumberStyles.Number, CultureInfo.InvariantCulture, out decimal value))
+                {
+                    continue;
+                }
+
+                decimal quotient = value / baseQuantity;
+                if (GetDecimalScale(quotient) > 4)
+                {
+                    messages.Add(new ValidationMessage(
+                        ValidationSeverity.Error,
+                        "ERB-04",
+                        "Die Division durch BaseQuantity darf höchstens vier Nachkommastellen ergeben.",
+                        GetLine(amount),
+                        GetPosition(amount)));
+                }
+            }
+        }
+
+        private static int GetDecimalScale(decimal value)
+        {
+            int flags = Decimal.GetBits(value)[3];
+            return (flags >> 16) & 0x7F;
         }
 
         private static int GetLine(XElement element)

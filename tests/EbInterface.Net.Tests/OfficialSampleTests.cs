@@ -115,6 +115,36 @@ namespace EbInterface.Tests
             Assert.DoesNotContain(result.Errors, message => message.Code == "ERB-03");
         }
 
+        [Fact]
+        public void BaseQuantityWithMoreThanFourDecimalPlaces_ReportsErbCode()
+        {
+            var document = XDocument.Load(SamplePath);
+            XElement invoice = document.Root ?? throw new InvalidOperationException();
+            XNamespace ns = invoice.Name.Namespace;
+            XElement unitPrice = invoice.Descendants(ns + "UnitPrice").First();
+            unitPrice.SetAttributeValue("BaseQuantity", "3");
+            unitPrice.Value = "1";
+
+            var result = Validate(document);
+
+            Assert.Contains(result.Errors, message => message.Code == "ERB-04");
+        }
+
+        [Fact]
+        public void BaseQuantityWithFourDecimalPlaces_IsAccepted()
+        {
+            var document = XDocument.Load(SamplePath);
+            XElement invoice = document.Root ?? throw new InvalidOperationException();
+            XNamespace ns = invoice.Name.Namespace;
+            XElement unitPrice = invoice.Descendants(ns + "UnitPrice").First();
+            unitPrice.SetAttributeValue("BaseQuantity", "2");
+            unitPrice.Value = "1";
+
+            var result = Validate(document);
+
+            Assert.DoesNotContain(result.Errors, message => message.Code == "ERB-04");
+        }
+
         private static ValidationResult Validate(XDocument document)
         {
             using var stream = new MemoryStream();
