@@ -8,8 +8,7 @@ using EbInterface.Internal;
 namespace EbInterface.Validation
 {
     /// <summary>
-    /// Prüft ebInterface-Dokumente. Derzeit: Wohlgeformtheit, Versionserkennung und XML-Schema.
-    /// Die Regeln von e-Rechnung.gv.at folgen als eigene Prüfstufe.
+    /// Prüft ebInterface-Dokumente auf Wohlgeformtheit, Version, XML-Schema und Bundesregeln.
     /// </summary>
     public static class EbInterfaceValidator
     {
@@ -66,6 +65,22 @@ namespace EbInterface.Validation
             {
                 messages.Add(new ValidationMessage(ValidationSeverity.Error, "XML-01",
                     $"Das Dokument ist kein wohlgeformtes XML: {ex.Message}", ex.LineNumber, ex.LinePosition));
+            }
+
+            bool hasErrors = false;
+            foreach (ValidationMessage message in messages)
+            {
+                if (message.Severity == ValidationSeverity.Error)
+                {
+                    hasErrors = true;
+                    break;
+                }
+            }
+
+            if (!hasErrors)
+            {
+                xml.Position = start;
+                ERechnungValidator.Validate(xml, messages);
             }
 
             return new ValidationResult(version, messages);

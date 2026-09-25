@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Xml.Linq;
 using EbInterface.Validation;
 using Xunit;
 
@@ -19,13 +20,14 @@ namespace EbInterface.Tests
 
         [Theory]
         [MemberData(nameof(Samples))]
-        public void OfficialSample_IsValid_UnlessMarkedInvalid(string relativePath)
+        public void OfficialSample_IsSchemaValid_UnlessMarkedInvalid(string relativePath)
         {
             var result = EbInterfaceValidator.ValidateFile(Path.Combine(SamplesRoot, relativePath));
-            bool expectedValid = !relativePath.Contains("_invalid");
+            bool expectedSchemaValid = !relativePath.Contains("_invalid");
+            bool schemaValid = !result.Errors.Any(message => message.Code == "XSD-01");
 
-            Assert.True(expectedValid == result.IsValid,
-                $"{relativePath}: erwartet {(expectedValid ? "gültig" : "ungültig")}, Meldungen:\n" +
+            Assert.True(expectedSchemaValid == schemaValid,
+                $"{relativePath}: erwartet {(expectedSchemaValid ? "XSD-gültig" : "XSD-ungültig")}, Meldungen:\n" +
                 string.Join("\n", result.Messages));
         }
 
@@ -49,6 +51,51 @@ namespace EbInterface.Tests
             var error = Assert.Single(result.Errors);
             Assert.Equal("XSD-01", error.Code);
             Assert.True(error.Line > 0);
+        }
+    }
+
+    public class ERechnungValidationTests
+    {
+        private static readonly string SamplePath = Path.Combine(
+            AppContext.BaseDirectory,
+            "standards",
+            "ebInterface6p1",
+            "samples",
+            "ebinterface_6p1_sample_ph1.xml");
+
+        [Fact]
+        public void DisallowedDocumentType_ReportsErbCode()
+        {
+            var document = XDocument.Load(SamplePath);
+            XElement invoice = document.Root ?? throw new InvalidOperationException();
+            invoice.SetAttributeValue("DocumentType", "SelfBilling");
+
+            var result = Validate(document);
+
+            Assert.Contains(result.Errors, message => message.Code == "ERB-01");
+        }
+
+        [Fact]
+        public void MissingRecipientOrderReference_ReportsErbCode()
+        {
+            var document = XDocument.Load(SamplePath);
+            XElement invoice = document.Root ?? throw new InvalidOperationException();
+            XNamespace ns = invoice.Name.Namespace;
+            XElement recipient = invoice.Element(ns + "InvoiceRecipient") ?? throw new InvalidOperationException();
+            XElement orderReference = recipient.Element(ns + "OrderReference") ?? throw new InvalidOperationException();
+            orderReference.Remove();
+
+            var result = Validate(document);
+
+            Assert.Contains(result.Errors, message => message.Code == "ERB-02");
+        }
+
+        private static ValidationResult Validate(XDocument document)
+        {
+            using var stream = new MemoryStream();
+            document.Save(stream);
+            stream.Position = 0;
+            return EbInterfaceValidator.Validate(stream);
         }
     }
 
