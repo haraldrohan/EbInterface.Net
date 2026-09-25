@@ -2,8 +2,10 @@
 
 ## Schwachstellen melden
 
-Bitte melde Sicherheitslücken **nicht** über öffentliche Issues, sondern vertraulich über
-[GitHub Security Advisories](../../security/advisories/new) dieses Repositorys oder per E-Mail an [E-Mail-Adresse].
+Bitte melde Sicherheitslücken ausschließlich vertraulich über die private
+Schwachstellenmeldung von GitHub: Öffne im Repository den Bereich **Security** und
+wähle **Report a vulnerability**. Diese Funktion muss in den Repository-Einstellungen
+aktiviert sein.
 
 Du erhältst innerhalb von 7 Tagen eine Rückmeldung.
 

@@ -88,6 +88,7 @@ Schema-Version + ein gemeinsames Rechnungsmodell `EbInvoice` + Mapper in beide R
 - Öffentliche API klein halten; alles andere `internal`. Nach 1.0 gilt Semantic Versioning streng.
 - Jede nutzerrelevante Änderung in `CHANGELOG.md` unter "Unveröffentlicht" eintragen.
 - README-Hinweis "nicht offiziell von AUSTRIAPRO" nicht entfernen.
+- Keine E-Mail-Adressen in Dateien; Commits nur mit der GitHub-Noreply-Adresse 14447036+haraldrohan@users.noreply.github.com; Sicherheitsmeldungen über GitHub Private Vulnerability Reporting.
 
 ## Befehle
 

@@ -45,7 +45,7 @@ if (!result.IsValid)
 Die offiziellen Schemas und Beispielrechnungen stammen aus dem Repository [austriapro/ebinterface-standards](https://github.com/austriapro/ebinterface-standards) und sind als Git-Submodule eingebunden:
 
 ```
-git clone --recurse-submodules https://github.com/[github-user]/EbInterface.Net.git
+git clone --recurse-submodules https://github.com/haraldrohan/EbInterface.Net.git
 dotnet test
 ```
 
