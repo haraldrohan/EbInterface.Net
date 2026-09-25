@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Eigene Testrechnung (MIT, EbInterface.Net): ebInterface 4.3, Bund, 10-stellige Bestellnummer mit Bestellpositionsnummern. -->
+<eb:Invoice xmlns:eb="http://www.ebinterface.at/schema/4p3/" eb:GeneratingSystem="EbInterface.Net Tests" eb:DocumentType="Invoice" eb:InvoiceCurrency="EUR" eb:Language="ger">
+  <eb:InvoiceNumber>T-2026-0043</eb:InvoiceNumber>
+  <eb:InvoiceDate>2026-09-01</eb:InvoiceDate>
+  <eb:Delivery>
+    <eb:Date>2026-08-28</eb:Date>
+  </eb:Delivery>
+  <eb:Biller>
+    <eb:VATIdentificationNumber>ATU12345678</eb:VATIdentificationNumber>
+    <eb:FurtherIdentification eb:IdentificationType="FS">Linz</eb:FurtherIdentification>
+    <eb:FurtherIdentification eb:IdentificationType="FN">123456a</eb:FurtherIdentification>
+    <eb:FurtherIdentification eb:IdentificationType="FBG">Landesgericht Linz</eb:FurtherIdentification>
+    <eb:Address>
+      <eb:Name>Beispiel Handels GmbH</eb:Name>
+      <eb:Street>Musterweg 1</eb:Street>
+      <eb:Town>Linz</eb:Town>
+      <eb:ZIP>4020</eb:ZIP>
+      <eb:Country eb:CountryCode="AT">Österreich</eb:Country>
+      <eb:Email>rechnung@example.org</eb:Email>
+    </eb:Address>
+    <eb:InvoiceRecipientsBillerID>50012345</eb:InvoiceRecipientsBillerID>
+  </eb:Biller>
+  <eb:InvoiceRecipient>
+    <eb:VATIdentificationNumber>ATU00000000</eb:VATIdentificationNumber>
+    <eb:OrderReference>
+      <eb:OrderID>4700000001</eb:OrderID>
+    </eb:OrderReference>
+    <eb:Address>
+      <eb:Name>Beispiel-Dienststelle des Bundes</eb:Name>
+      <eb:Street>Amtsplatz 1</eb:Street>
+      <eb:Town>Wien</eb:Town>
+      <eb:ZIP>1010</eb:ZIP>
+      <eb:Country eb:CountryCode="AT">Österreich</eb:Country>
+    </eb:Address>
+  </eb:InvoiceRecipient>
+  <eb:Details>
+    <eb:ItemList>
+      <eb:ListLineItem>
+        <eb:Description>Druckerpapier A4, 500 Blatt</eb:Description>
+        <eb:Quantity eb:Unit="STK">20</eb:Quantity>
+        <eb:UnitPrice>4.50</eb:UnitPrice>
+        <eb:VATRate>20</eb:VATRate>
+        <eb:InvoiceRecipientsOrderReference>
+          <eb:OrderID>4700000001</eb:OrderID>
+          <eb:OrderPositionNumber>10</eb:OrderPositionNumber>
+        </eb:InvoiceRecipientsOrderReference>
+        <eb:LineItemAmount>90.00</eb:LineItemAmount>
+      </eb:ListLineItem>
+      <eb:ListLineItem>
+        <eb:Description>Toner schwarz</eb:Description>
+        <eb:Quantity eb:Unit="STK">2</eb:Quantity>
+        <eb:UnitPrice>55.00</eb:UnitPrice>
+        <eb:VATRate>20</eb:VATRate>
+        <eb:InvoiceRecipientsOrderReference>
+          <eb:OrderID>4700000001</eb:OrderID>
+          <eb:OrderPositionNumber>20</eb:OrderPositionNumber>
+        </eb:InvoiceRecipientsOrderReference>
+        <eb:LineItemAmount>110.00</eb:LineItemAmount>
+      </eb:ListLineItem>
+    </eb:ItemList>
+  </eb:Details>
+  <eb:Tax>
+    <eb:VAT>
+      <eb:VATItem>
+        <eb:TaxedAmount>200.00</eb:TaxedAmount>
+        <eb:VATRate>20</eb:VATRate>
+        <eb:Amount>40.00</eb:Amount>
+      </eb:VATItem>
+    </eb:VAT>
+  </eb:Tax>
+  <eb:TotalGrossAmount>240.00</eb:TotalGrossAmount>
+  <eb:PayableAmount>240.00</eb:PayableAmount>
+  <eb:PaymentMethod>
+    <eb:UniversalBankTransaction>
+      <eb:BeneficiaryAccount>
+        <eb:IBAN>AT611904300234573201</eb:IBAN>
+        <eb:BankAccountOwner>Beispiel Handels GmbH</eb:BankAccountOwner>
+      </eb:BeneficiaryAccount>
+    </eb:UniversalBankTransaction>
+  </eb:PaymentMethod>
+  <eb:PaymentConditions>
+    <eb:DueDate>2026-10-01</eb:DueDate>
+    <eb:Discount>
+      <eb:PaymentDate>2026-09-15</eb:PaymentDate>
+      <eb:Percentage>2.00</eb:Percentage>
+    </eb:Discount>
+  </eb:PaymentConditions>
+</eb:Invoice>

@@ -20,10 +20,15 @@
 
   <ItemGroup>
     <!-- Offizielle Schemas (AUSTRIAPRO) aus dem Submodule, eingebettet als Ressourcen.
-         Siehe THIRD-PARTY-NOTICES.md. ebInterface 4.3 folgt (benötigt xmldsig-Schema). -->
+         Siehe THIRD-PARTY-NOTICES.md. -->
+    <EmbeddedResource Include="$(EbInterfaceStandardsDir)schemas/ebInterface4p3/Invoice.xsd" LogicalName="EbInterface.Schemas.4p3.Invoice.xsd" />
+    <EmbeddedResource Include="$(EbInterfaceStandardsDir)schemas/ebInterface4p3/ebInterfaceExtension.xsd" LogicalName="EbInterface.Schemas.4p3.ebInterfaceExtension.xsd" />
+    <EmbeddedResource Include="$(EbInterfaceStandardsDir)schemas/ebInterface4p3/ext/ebInterfaceExtension_SV.xsd" LogicalName="EbInterface.Schemas.4p3.ebInterfaceExtension_SV.xsd" />
     <EmbeddedResource Include="$(EbInterfaceStandardsDir)schemas/ebInterface5p0/Invoice.xsd" LogicalName="EbInterface.Schemas.5p0.Invoice.xsd" />
     <EmbeddedResource Include="$(EbInterfaceStandardsDir)schemas/ebInterface6p0/Invoice.xsd" LogicalName="EbInterface.Schemas.6p0.Invoice.xsd" />
     <EmbeddedResource Include="$(EbInterfaceStandardsDir)schemas/ebInterface6p1/Invoice.xsd" LogicalName="EbInterface.Schemas.6p1.Invoice.xsd" />
+    <!-- W3C-Schema für XML-Signaturen, von 4.3 importiert. Unverändert übernommen, siehe THIRD-PARTY-NOTICES.md. -->
+    <EmbeddedResource Include="Schemas/w3c/xmldsig-core-schema.xsd" LogicalName="EbInterface.Schemas.w3c.xmldsig-core-schema.xsd" />
   </ItemGroup>
 
   <ItemGroup>

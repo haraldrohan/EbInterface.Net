@@ -11,8 +11,8 @@ Frühe Entwicklungsphase (`0.1.0-alpha`). Die API kann sich noch ändern.
 | Funktion | 4.3 | 5.0 | 6.0 | 6.1 | 7.0 |
 |---|---|---|---|---|---|
 | Versionserkennung | ✅ | ✅ | ✅ | ✅ | geplant |
-| Schema-Prüfung (XSD) | geplant | ✅ | ✅ | ✅ | geplant |
-| Regeln von e-Rechnung.gv.at | geplant | ✅ | ✅ | ✅ | geplant |
+| Schema-Prüfung (XSD) | ✅ | ✅ | ✅ | ✅ | geplant |
+| Regeln von e-Rechnung.gv.at | ✅ | ✅ | ✅ | ✅ | geplant |
 | Lesen in ein Modell | – | geplant | geplant | geplant | geplant |
 | Schreiben | – | – | geplant | geplant | geplant |
 | Versions-Upgrade | geplant | geplant | geplant | – | – |

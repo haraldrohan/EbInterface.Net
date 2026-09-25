@@ -27,6 +27,8 @@ Private Hintergrundnotizen (nur lokal, nicht im Repository): @~/.claude/ebinterf
   Netz laden. Submodule-Update = bewusster Schritt mit CHANGELOG-Eintrag und neuem Commit in `THIRD-PARTY-NOTICES.md`.
 - **Keine Netzwerkzugriffe** in der Bibliothek. Rechnungsdaten verlassen nie das System des Nutzers.
 - **Sicheres XML:** immer über `Internal.XmlSettings.CreateSecureReaderSettings` lesen (keine DTD, kein XmlResolver).
+  Einzige Ausnahme: `CreateTrustedSchemaReaderSettings` (DTD wird übersprungen) für das mitgelieferte, unveränderte
+  W3C-xmldsig-Schema – niemals für Eingabedokumente.
 - **Prüfprofile:** `ValidationProfile.Standard` (Vorgabe) prüft nur den ebInterface-Standard, weil viele Rechnungen
   an Unternehmen gehen und dort die Bundesregeln nicht gelten. `ValidationProfile.ERechnungGvAt` schaltet die
   Regeln von e-Rechnung.gv.at zu.
@@ -40,11 +42,11 @@ Eine Stufe läuft nur, wenn die vorige ohne Fehler bestanden wurde:
 
 1. **XML** – wohlgeformt? (`XML-xx`)
 2. **Version** – `Invoice` in bekanntem Namespace? (`VER-xx`)
-3. **Schema** – XSD der erkannten Version (`XSD-xx`); vorhanden für 5.0/6.0/6.1. Eigener Durchlauf mit
+3. **Schema** – XSD der erkannten Version (`XSD-xx`); vorhanden für 4.3/5.0/6.0/6.1. Eigener Durchlauf mit
    `XmlSchemaValidator` (`Internal/SchemaCheck`), damit die Meldungen deutsch und laufzeitunabhängig sind –
    .NET-Meldungstexte nie parsen (unter .NET Framework mit Sprachpaket sind sie bereits deutsch)
-4. **e-Rechnung.gv.at** – nur im Profil `ERechnungGvAt` (`ERB-xx`); Regeln für 4.3–6.1 umgesetzt, 4.3 greift erst
-   mit der XSD-Prüfung für 4.3
+4. **e-Rechnung.gv.at** – nur im Profil `ERechnungGvAt` (`ERB-xx`); Regeln für 4.3–6.1. In 4.3 sind
+   Attribute qualifiziert (`eb:DocumentType`) – Attributnamen immer über `Context.Attr` bilden
 5. später: EN-16931-Regeln für 7.0
 
 Fehlercodes sind **stabil**: ein Code je Regel, nach Veröffentlichung keine Bedeutungsänderung, keine Wiederverwendung.
@@ -73,15 +75,17 @@ Grundsätze dazu:
 ## Quellen
 
 - **Schemas & Beispiele (AUSTRIAPRO):** `external/ebinterface-standards/schemas/ebInterface<ver>/`. 4.3 importiert
-  `ebInterfaceExtension.xsd`, `ext/ebInterfaceExtension_SV.xsd` und das W3C-xmldsig-Schema per URL – für 4.3 muss
-  das xmldsig-Schema lokal eingebettet werden. 5.0/6.0/6.1 sind in sich geschlossen.
+  `ebInterfaceExtension.xsd`, `ext/ebInterfaceExtension_SV.xsd` und das W3C-xmldsig-Schema per URL. Das xmldsig-Schema
+  liegt byte-genau unter `src/EbInterface.Net/Schemas/w3c/` (W3C Software License, Text in THIRD-PARTY-NOTICES.md,
+  `.gitattributes` verhindert Zeilenende-Umwandlung); alle importierten Schemas werden vorab in dasselbe
+  `XmlSchemaSet` geladen. 5.0/6.0/6.1 sind in sich geschlossen.
 - **Bund-Schemas** (https://www.erechnung.gv.at/files/xsd/ebinterface-6.1-bund.xsd, ebenso 6.0, 5.0, 4.3):
   **nur Referenz, nicht einbetten, nicht committen** („Copyright BRZ GmbH – All rights reserved“). Lokal mit dem
   Original vergleichen; die `[CHANGE]`-Stellen sind als eigene C#-Regeln umgesetzt.
 - **Bund-Beispiele** (https://www.erechnung.gv.at/files/xml/example-ebi61.xml, ebenso ebi60, ebi50, ebi43,
   ebi43-finalsettlement): **nur Referenz, nicht committen.** Eigene Testdaten nach diesem Vorbild unter
-  `tests/EbInterface.Net.Tests/TestData/<ver>/`. Die Beispiele 5.0/6.0/6.1 bestehen das Profil ohne Meldung
-  (Stand 2026-09-25) – nach Regeländerungen lokal erneut prüfen.
+  `tests/EbInterface.Net.Tests/TestData/<ver>/`. Die Beispiele bestehen das Profil ohne Fehler; nur ebi43-finalsettlement
+  erzeugt die Warnung ERB-09, weil dort FS/FN/FBG fehlen (Stand 2026-09-25) – nach Regeländerungen lokal erneut prüfen.
 - **Einkäufergruppen-Liste** (https://www.erechnung.gv.at/go/ekgrlist-excel): **nur Referenz, nicht einbetten**
   (Lizenz ungeklärt, ändert sich).
 - **Endgültiger Test:** https://test.erechnung.gv.at/go/test_upload (USP-Zugang, von Harald beantragt).
@@ -117,13 +121,12 @@ dotnet pack src/EbInterface.Net -c Release -o artifacts
 
 ## Stand und nächste Schritte
 
-Erledigt: Versionserkennung (4.3–6.1), XSD-Prüfung 5.0/6.0/6.1 mit deutschen Meldungen, XXE-Schutz, Prüfprofile, Regeln von
+Erledigt: Versionserkennung (4.3–6.1), XSD-Prüfung 4.3–6.1 mit deutschen Meldungen, XXE-Schutz, Prüfprofile, Regeln von
 e-Rechnung.gv.at (ERB-01 bis ERB-38), eigene Testdaten, CI.
 
 Als Nächstes, in dieser Reihenfolge:
-1. XSD-Prüfung für 4.3 (xmldsig-Schema lokal einbetten) – damit greifen auch die ERB-Regeln für 4.3.
-2. Offene fachliche Punkte klären, sobald der Test-Upload verfügbar ist: Was prüft e-Rechnung.gv.at an
+1. Offene fachliche Punkte klären, sobald der Test-Upload verfügbar ist: Was prüft e-Rechnung.gv.at an
    `PayableAmount`? Zählt „999 Rechnungs- und/oder Below-The-Line-Zeilen“ zusammen oder getrennt? Welche
    Zeilen-`OrderID` gilt bei anderen Empfängern als „andere Bestellung“?
-3. Rechnungsmodell `EbInvoice` + Reader für 5.0/6.0/6.1.
-4. Writer für 6.1, danach Versions-Upgrade.
+2. Rechnungsmodell `EbInvoice` + Reader für 5.0/6.0/6.1.
+3. Writer für 6.1, danach Versions-Upgrade.

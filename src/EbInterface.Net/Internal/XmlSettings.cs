@@ -18,5 +18,16 @@ namespace EbInterface.Internal
                 IgnoreComments = true,
             };
         }
+
+        /// <summary>
+        /// Nur für mitgelieferte, unveränderte Fremd-Schemas mit DOCTYPE (W3C xmldsig): Die DTD wird übersprungen,
+        /// nicht ausgewertet – keine Entitäten, kein Nachladen. Niemals für Eingabedokumente verwenden.
+        /// </summary>
+        internal static XmlReaderSettings CreateTrustedSchemaReaderSettings()
+        {
+            XmlReaderSettings settings = CreateSecureReaderSettings(closeInput: false);
+            settings.DtdProcessing = DtdProcessing.Ignore;
+            return settings;
+        }
     }
 }

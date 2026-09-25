@@ -400,6 +400,63 @@ namespace EbInterface.Tests
             Assert.All(result.Messages, m => Assert.Equal(ValidationSeverity.Warning, m.Severity));
         }
 
+        // --- ebInterface 4.3 (qualifizierte Attribute, DirectDebit) ------------------------------
+
+        private const string File4p3 = "4p3/gueltig-bestellnummer.xml";
+
+        [Fact]
+        public void V4p3_ValidTestFile_HasNoMessages()
+        {
+            var result = EbInterfaceValidator.ValidateFile(TestFile(File4p3), ERechnung);
+
+            Assert.Equal(EbInterfaceVersion.V4p3, result.Version);
+            Assert.True(result.Messages.Count == 0, Describe(result));
+        }
+
+        [Fact]
+        public void V4p3_QualifiedDocumentTypeIsRead()
+        {
+            var document = LoadTestData(File4p3);
+            document.Root!.SetAttributeValue(document.N("DocumentType"), "SelfBilling");
+
+            AssertCode(Validate(document, ERechnung), "ERB-01", true);
+        }
+
+        [Fact]
+        public void V4p3_QualifiedIdentificationTypeIsRead()
+        {
+            var document = LoadTestData(File4p3);
+            document.Descendants(document.N("FurtherIdentification"))
+                .Where(e => (string?)e.Attribute(document.N("IdentificationType")) == "FN").Remove();
+
+            var warning = Assert.Single(Validate(document, ERechnung).Messages);
+            Assert.Equal("ERB-09", warning.Code);
+            Assert.Contains("fehlen: FN.", warning.Message);
+        }
+
+        [Fact]
+        public void V4p3_QualifiedBaseQuantityIsRead()
+        {
+            var document = LoadTestData(File4p3);
+            document.El("Quantity").Value = "10";
+            XElement price = document.El("UnitPrice");
+            price.Value = "1.00";
+            price.SetAttributeValue(document.N("BaseQuantity"), "3");
+
+            AssertCode(Validate(document, ERechnung), "ERB-21", true);
+        }
+
+        [Fact]
+        public void V4p3_DirectDebitIsAllowed()
+        {
+            var document = LoadTestData(File4p3);
+            document.El("UniversalBankTransaction").ReplaceWith(new XElement(document.N("DirectDebit")));
+
+            var result = Validate(document, ERechnung);
+
+            Assert.True(result.Messages.Count == 0, Describe(result));
+        }
+
         // --- Hilfen ------------------------------------------------------------------------------
 
         private static void AssertCode(ValidationResult result, string code, bool expected)

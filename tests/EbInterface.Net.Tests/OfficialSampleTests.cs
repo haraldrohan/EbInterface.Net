@@ -11,7 +11,7 @@ namespace EbInterface.Tests
                 .SelectMany(v => Directory.GetFiles(Path.Combine(StandardsRoot, $"ebInterface{v}", "samples"), "*.xml"))
                 .Select(f => new object[] { Path.GetRelativePath(StandardsRoot, f) });
 
-        public static IEnumerable<object[]> SchemaSamples() => Samples("5p0,6p0,6p1");
+        public static IEnumerable<object[]> SchemaSamples() => Samples("4p3,5p0,6p0,6p1");
 
         public static IEnumerable<object[]> AllSupportedSamples() => Samples("4p3,5p0,6p0,6p1");
 

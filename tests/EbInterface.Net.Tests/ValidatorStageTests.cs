@@ -42,16 +42,6 @@ namespace EbInterface.Tests
         }
 
         [Fact]
-        public void Version4p3_IsDetectedButNotYetChecked()
-        {
-            var result = EbInterfaceValidator.ValidateFile(
-                Path.Combine(StandardsRoot, "ebInterface4p3", "samples", "ebInterface_4p3_sample.xml"));
-
-            Assert.Equal(EbInterfaceVersion.V4p3, result.Version);
-            Assert.Equal("VER-02", Assert.Single(result.Errors).Code);
-        }
-
-        [Fact]
         public void NonSeekableStream_IsAccepted()
         {
             byte[] bytes = File.ReadAllBytes(TestFile("6p1/gueltig-bestellnummer.xml"));

@@ -10,7 +10,7 @@ Die Meldungen sind deutsch, unabhängig von Sprache und Version der .NET-Laufzei
 |---|---|---|
 | XML-01 | XML | Das Dokument ist kein wohlgeformtes XML (DTDs werden aus Sicherheitsgründen abgelehnt). |
 | VER-01 | Version | Kein ebInterface: Das Wurzelelement ist nicht `Invoice` in einem ebInterface-Namespace. |
-| VER-02 | Version | Die Version wird erkannt, aber von dieser Bibliotheksversion noch nicht geprüft (derzeit 4.3). |
+| VER-02 | Version | Die Version wird erkannt, aber von dieser Bibliotheksversion noch nicht geprüft (derzeit keine; vorgesehen für neue Versionen wie 7.0). |
 | VER-03 | Version | Veraltete ebInterface-Version (z. B. 4.2 oder 3.0), die nicht unterstützt wird. |
 | XSD-01 | Schema | Sonstiger Verstoß gegen das XML-Schema (Meldung von .NET, wenn keine genauere Einordnung möglich ist). |
 | XSD-02 | Schema | Pflichtelement fehlt am Ende eines Elements. |

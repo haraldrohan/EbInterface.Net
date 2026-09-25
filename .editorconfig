@@ -9,3 +9,12 @@ trim_trailing_whitespace = true
 
 [*.{csproj,props,targets,yml,yaml,json,md}]
 indent_size = 2
+
+# Fremde Dateien unverändert lassen (siehe THIRD-PARTY-NOTICES.md)
+[src/EbInterface.Net/Schemas/w3c/**]
+charset = unset
+end_of_line = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+indent_style = unset
+indent_size = unset

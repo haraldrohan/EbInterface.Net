@@ -205,7 +205,7 @@ namespace EbInterface.Validation
 
             var missing = new[] { "FS", "FN", "FBG" }
                 .Where(type => !biller.Elements(ctx.Ns + "FurtherIdentification").Any(fi =>
-                    fi.Attribute("IdentificationType")?.Value == type && !string.IsNullOrWhiteSpace(fi.Value)))
+                    fi.Attribute(ctx.Attr("IdentificationType"))?.Value == type && !string.IsNullOrWhiteSpace(fi.Value)))
                 .ToList();
             if (missing.Count > 0)
             {
@@ -375,7 +375,7 @@ namespace EbInterface.Validation
             {
                 XElement? unitPrice = line.Element(ctx.Ns + "UnitPrice");
                 XElement? quantity = line.Element(ctx.Ns + "Quantity");
-                string? baseText = unitPrice?.Attribute("BaseQuantity")?.Value;
+                string? baseText = unitPrice?.Attribute(ctx.Attr("BaseQuantity"))?.Value;
 
                 if (baseText == null || quantity == null ||
                     !TryParseDecimal(baseText, out decimal baseQuantity) || baseQuantity == 0 ||
@@ -413,7 +413,7 @@ namespace EbInterface.Validation
             WarnIfPresent(ctx, v43, "ERB-36", ctx.LineItems.Elements(ctx.Ns + "AdditionalInformation"), "ListLineItem/AdditionalInformation");
             WarnIfPresent(ctx, v43, "ERB-37", ctx.Invoice.Descendants(ctx.Ns + "PresentationDetails"), "PresentationDetails");
             WarnIfPresent(ctx, v43, "ERB-38",
-                ctx.Invoice.Descendants(ctx.Ns + "VATRate").Where(e => e.Attribute("TaxCode") != null), "VATRate/@TaxCode");
+                ctx.Invoice.Descendants(ctx.Ns + "VATRate").Where(e => e.Attribute(ctx.Attr("TaxCode")) != null), "VATRate/@TaxCode");
         }
 
         private static void WarnIfPresent(Context ctx, bool applies, string code, IEnumerable<XElement> elements, string field)
@@ -449,7 +449,7 @@ namespace EbInterface.Validation
                 Ns = ns;
                 Version = version;
                 Messages = messages;
-                DocumentType = invoice.Attribute("DocumentType")?.Value ?? string.Empty;
+                DocumentType = invoice.Attribute(Attr("DocumentType"))?.Value ?? string.Empty;
                 LineItems = invoice.Descendants(ns + "ListLineItem").ToList();
             }
 
@@ -459,6 +459,9 @@ namespace EbInterface.Validation
             internal IList<ValidationMessage> Messages { get; }
             internal string DocumentType { get; }
             internal IReadOnlyList<XElement> LineItems { get; }
+
+            /// <summary>Attributname: In 4.3 sind Attribute qualifiziert (attributeFormDefault="qualified"), ab 5.0 nicht.</summary>
+            internal XName Attr(string localName) => Version == EbInterfaceVersion.V4p3 ? Ns + localName : XName.Get(localName);
 
             internal void Error(string code, XElement at, string message) => Add(ValidationSeverity.Error, code, at, message);
 

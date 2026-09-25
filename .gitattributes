@@ -1,0 +1,2 @@
+# Fremde Dateien byte-genau wie von der Quelle belassen (Prüfsumme in THIRD-PARTY-NOTICES.md)
+src/EbInterface.Net/Schemas/w3c/** -text -whitespace
