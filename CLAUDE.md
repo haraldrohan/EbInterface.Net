@@ -12,7 +12,7 @@ Hausverwaltung), Anbieter von Zusatzmodulen, Integratoren. Nicht Endanwender.
 **Kernnutzen:** Hersteller müssen Format, Bundesregeln und Versionswechsel nicht selbst pflegen.
 Es gibt aktuell keine gepflegte ebInterface-Bibliothek für .NET (geprüft: NuGet, GitHub; Stand 09/2026).
 
-Hintergrund und Begründungen: `docs/hintergrund.md`.
+Private Hintergrundnotizen (nur lokal, nicht im Repository): @~/.claude/ebinterface-hintergrund.md
 
 ## Feste Entscheidungen
 
@@ -89,6 +89,7 @@ Schema-Version + ein gemeinsames Rechnungsmodell `EbInvoice` + Mapper in beide R
 - Jede nutzerrelevante Änderung in `CHANGELOG.md` unter "Unveröffentlicht" eintragen.
 - README-Hinweis "nicht offiziell von AUSTRIAPRO" nicht entfernen.
 - Keine E-Mail-Adressen in Dateien; Commits nur mit der GitHub-Noreply-Adresse 14447036+haraldrohan@users.noreply.github.com; Sicherheitsmeldungen über GitHub Private Vulnerability Reporting.
+- Keine Wertungen über andere Firmen, Projekte oder Websites in öffentlichen Dateien. Solche Notizen gehören in ~/.claude/ebinterface-hintergrund.md.
 
 ## Befehle
 
