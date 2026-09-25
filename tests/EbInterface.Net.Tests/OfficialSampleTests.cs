@@ -90,6 +90,31 @@ namespace EbInterface.Tests
             Assert.Contains(result.Errors, message => message.Code == "ERB-02");
         }
 
+        [Fact]
+        public void MissingBillerRegisteredOffice_ReportsErbCode()
+        {
+            var result = Validate(XDocument.Load(SamplePath));
+
+            Assert.Contains(result.Errors, message => message.Code == "ERB-03");
+        }
+
+        [Fact]
+        public void BillerRegisteredOffice_IsAccepted()
+        {
+            var document = XDocument.Load(SamplePath);
+            XElement invoice = document.Root ?? throw new InvalidOperationException();
+            XNamespace ns = invoice.Name.Namespace;
+            XElement biller = invoice.Element(ns + "Biller") ?? throw new InvalidOperationException();
+            biller.Add(new XElement(
+                ns + "FurtherIdentification",
+                new XAttribute("IdentificationType", "FS"),
+                "FN 123456a"));
+
+            var result = Validate(document);
+
+            Assert.DoesNotContain(result.Errors, message => message.Code == "ERB-03");
+        }
+
         private static ValidationResult Validate(XDocument document)
         {
             using var stream = new MemoryStream();
