@@ -277,6 +277,43 @@ namespace EbInterface.Tests
             Assert.DoesNotContain(result.Errors, message => message.Code == "ERB-13");
         }
 
+        [Fact]
+        public void SepaDirectDebitWithoutRequiredFields_ReportsErbCode()
+        {
+            var document = XDocument.Load(SamplePath);
+            XElement invoice = document.Root ?? throw new InvalidOperationException();
+            XNamespace ns = invoice.Name.Namespace;
+            XElement paymentMethod = invoice.Element(ns + "PaymentMethod") ?? throw new InvalidOperationException();
+            paymentMethod.RemoveNodes();
+            paymentMethod.Add(new XElement(ns + "SEPADirectDebit"));
+
+            var result = Validate(document);
+
+            Assert.Contains(result.Errors, message => message.Code == "ERB-15");
+        }
+
+        [Fact]
+        public void SepaDirectDebitWithRequiredFields_IsAccepted()
+        {
+            var document = XDocument.Load(SamplePath);
+            XElement invoice = document.Root ?? throw new InvalidOperationException();
+            XNamespace ns = invoice.Name.Namespace;
+            XElement paymentMethod = invoice.Element(ns + "PaymentMethod") ?? throw new InvalidOperationException();
+            paymentMethod.RemoveNodes();
+            paymentMethod.Add(new XElement(
+                ns + "SEPADirectDebit",
+                new XElement(ns + "Type", "CORE"),
+                new XElement(ns + "IBAN", "AT611904300234573201"),
+                new XElement(ns + "BankAccountOwner", "Maxima Kontofrau"),
+                new XElement(ns + "CreditorID", "AT98ZZZ09999999999"),
+                new XElement(ns + "MandateReference", "MANDATE-1"),
+                new XElement(ns + "DebitCollectionDate", "2026-10-01")));
+
+            var result = Validate(document);
+
+            Assert.DoesNotContain(result.Errors, message => message.Code == "ERB-15");
+        }
+
         private static ValidationResult Validate(XDocument document)
         {
             using var stream = new MemoryStream();

@@ -342,6 +342,30 @@ namespace EbInterface.Validation
                         GetPosition(accounts[0])));
                 }
             }
+            else if (payment.Name == ns + "SEPADirectDebit")
+            {
+                foreach (string requiredElement in new[]
+                {
+                    "Type",
+                    "IBAN",
+                    "BankAccountOwner",
+                    "CreditorID",
+                    "MandateReference",
+                    "DebitCollectionDate",
+                })
+                {
+                    XElement? field = payment.Element(ns + requiredElement);
+                    if (field == null || string.IsNullOrWhiteSpace(field.Value))
+                    {
+                        messages.Add(new ValidationMessage(
+                            ValidationSeverity.Error,
+                            "ERB-15",
+                            $"SEPADirectDebit benötigt das Pflichtfeld {requiredElement}.",
+                            GetLine(payment),
+                            GetPosition(payment)));
+                    }
+                }
+            }
         }
 
         private static void ValidateBaseQuantityPrecision(
