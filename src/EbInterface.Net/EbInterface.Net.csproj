@@ -12,6 +12,7 @@
     <PackageTags>ebinterface;e-invoice;e-rechnung;einvoicing;austria;oesterreich;en16931;xml</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>Änderungen: https://github.com/haraldrohan/EbInterface.Net/blob/main/CHANGELOG.md</PackageReleaseNotes>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <IncludeSymbols>true</IncludeSymbols>

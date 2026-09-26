@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Sicherheitslücke melden (vertraulich)
+    url: https://github.com/haraldrohan/EbInterface.Net/security/advisories/new
+    about: Sicherheitslücken bitte nie öffentlich, sondern über die private Schwachstellenmeldung von GitHub.
+  - name: Regeln von e-Rechnung.gv.at
+    url: https://www.erechnung.gv.at/erb/tec_formats_ebinterface
+    about: Primärquelle für die Sonderregeln der öffentlichen Verwaltung.

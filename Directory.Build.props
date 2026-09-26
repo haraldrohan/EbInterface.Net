@@ -7,7 +7,11 @@
     <Copyright>Copyright (c) 2026 Harald Rohan</Copyright>
     <RepositoryUrl>https://github.com/haraldrohan/EbInterface.Net</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/haraldrohan/EbInterface.Net</PackageProjectUrl>
     <!-- Pfad zum Submodule mit den offiziellen Schemas von AUSTRIAPRO -->
     <EbInterfaceStandardsDir>$(MSBuildThisFileDirectory)external/ebinterface-standards/</EbInterfaceStandardsDir>
+    <!-- Reproduzierbare Builds in der CI (SourceLink: Quellpfade ohne lokale Verzeichnisse) -->
+    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
   </PropertyGroup>
 </Project>

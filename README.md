@@ -1,8 +1,15 @@
 # EbInterface.Net
 
+[![CI](https://github.com/haraldrohan/EbInterface.Net/actions/workflows/ci.yml/badge.svg)](https://github.com/haraldrohan/EbInterface.Net/actions/workflows/ci.yml)
+[![Lizenz: MIT](https://img.shields.io/badge/Lizenz-MIT-blue.svg)](https://github.com/haraldrohan/EbInterface.Net/blob/main/LICENSE)
+
 Unabhängige .NET-Implementierung des österreichischen E-Rechnungsstandards **ebInterface** – lesen, schreiben und prüfen, inklusive der Sonderregeln von e-Rechnung.gv.at.
 
 > **Hinweis:** Dies ist ein unabhängiges Open-Source-Projekt. Es wird nicht von AUSTRIAPRO oder der Wirtschaftskammer Österreich herausgegeben oder unterstützt. Der offizielle Standard ist unter [ebinterface.at](https://www.ebinterface.at) zu finden.
+
+> **English:** EbInterface.Net is an independent .NET library for ebInterface, the Austrian XML e-invoicing standard
+> (versions 4.3 to 6.1): read, write and validate invoices, including the additional rules of the Austrian federal
+> e-invoicing portal e-Rechnung.gv.at. Messages and documentation are in German. Not affiliated with AUSTRIAPRO.
 
 ## Status
 
@@ -44,7 +51,7 @@ foreach (var message in result.Messages)
 ```
 
 `IsValid` ist `true`, solange es keine Fehler gibt. Warnungen stehen zusätzlich in `Messages`, zum Beispiel für
-Felder, die e-Rechnung.gv.at nicht auswertet. Alle Codes und Regeln stehen in [docs/pruefregeln.md](docs/pruefregeln.md).
+Felder, die e-Rechnung.gv.at nicht auswertet. Alle Codes und Regeln stehen in [docs/pruefregeln.md](https://github.com/haraldrohan/EbInterface.Net/blob/main/docs/pruefregeln.md).
 
 ### Rechnung lesen
 
@@ -92,6 +99,12 @@ dotnet test
 
 Wer schon ohne Submodule geklont hat: `git submodule update --init`.
 
+## Mitwirken
+
+Fehlermeldungen und Hinweise sind willkommen – besonders, wenn e-Rechnung.gv.at eine Rechnung anders beurteilt als
+diese Bibliothek. Wie das geht, steht in [CONTRIBUTING.md](https://github.com/haraldrohan/EbInterface.Net/blob/main/CONTRIBUTING.md); Sicherheitslücken bitte vertraulich
+melden (siehe [SECURITY.md](https://github.com/haraldrohan/EbInterface.Net/blob/main/SECURITY.md)).
+
 ## Lizenz
 
-Der Code steht unter der [MIT-Lizenz](LICENSE). Die eingebetteten Schemas von AUSTRIAPRO sind davon ausgenommen – siehe [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+Der Code steht unter der [MIT-Lizenz](https://github.com/haraldrohan/EbInterface.Net/blob/main/LICENSE). Die eingebetteten Schemas von AUSTRIAPRO sind davon ausgenommen – siehe [THIRD-PARTY-NOTICES.md](https://github.com/haraldrohan/EbInterface.Net/blob/main/THIRD-PARTY-NOTICES.md).

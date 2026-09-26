@@ -1,0 +1,35 @@
+name: Fehler melden
+description: Etwas funktioniert nicht wie beschrieben.
+title: "Fehler: "
+labels: ["fehler"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Sicherheitslücken bitte nicht hier melden**, sondern vertraulich über „Security → Report a vulnerability“.
+        **Bitte keine echten Rechnungsdaten** posten.
+  - type: textarea
+    id: beschreibung
+    attributes:
+      label: Was ist passiert, und was hast du erwartet?
+    validations:
+      required: true
+  - type: textarea
+    id: nachstellen
+    attributes:
+      label: So lässt es sich nachstellen
+      description: Möglichst kurzer Code und, falls nötig, gekürztes synthetisches XML.
+      render: csharp
+  - type: input
+    id: bibliothek
+    attributes:
+      label: Version von EbInterface.Net
+    validations:
+      required: true
+  - type: input
+    id: laufzeit
+    attributes:
+      label: .NET-Version
+      placeholder: z. B. .NET Framework 4.8 oder .NET 8
+    validations:
+      required: true

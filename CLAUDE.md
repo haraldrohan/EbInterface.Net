@@ -113,7 +113,8 @@ Grundsätze dazu:
 - `TreatWarningsAsErrors` ist aktiv. XML-Doku-Kommentare für alle öffentlichen Typen (Deutsch).
 - Öffentliche API klein halten; alles andere `internal`. Nach 1.0 gilt Semantic Versioning streng.
 - Jede nutzerrelevante Änderung in `CHANGELOG.md` unter „Unveröffentlicht“ eintragen.
-- README-Hinweis „nicht offiziell von AUSTRIAPRO“ nicht entfernen.
+- README-Hinweis „nicht offiziell von AUSTRIAPRO“ nicht entfernen. Links im README absolut (github.com/…/blob/main/…), weil das README
+  auch auf nuget.org angezeigt wird. Regeln für Beiträge stehen in CONTRIBUTING.md.
 - Keine E-Mail-Adressen in Dateien (Testdaten nur mit reservierten Beispieldomains wie `example.org`); Commits nur mit
   der GitHub-Noreply-Adresse 14447036+haraldrohan@users.noreply.github.com; Sicherheitsmeldungen über GitHub Private
   Vulnerability Reporting.

@@ -1,0 +1,15 @@
+# Hält GitHub Actions und NuGet-Pakete (nur Test- und Build-Werkzeuge; die Bibliothek hat keine Abhängigkeiten) aktuell.
+# Das Submodule mit den Schemas wird bewusst NICHT automatisch aktualisiert (siehe CLAUDE.md).
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: nuget
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      test-tools:
+        patterns: ["*"]
