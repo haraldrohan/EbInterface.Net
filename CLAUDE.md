@@ -56,7 +56,9 @@ Meldungen auf **Deutsch**, verständlich, mit Hinweis zur Behebung, mit Zeile/Sp
 generierten Klassen je Schema-Version. `Internal/InvoiceMapper` übersetzt direkt aus dem XML (5.0–6.1 haben dieselben
 Elementnamen; 4.3 weicht bei Steuer `VATRate`/`TaxExemption`/`VAT/VATItem`, Kontakt in der Adresse und qualifizierten
 Attributen ab). Der Reader liest nur schemagültige Dokumente. Klassen mit `get; set;` und vorbelegten Listen
-(netstandard2.0, VB.NET). Versions-Upgrade = einlesen ins Modell, ausgeben in neuer Version.
+(netstandard2.0, VB.NET). Versions-Upgrade = einlesen ins Modell, ausgeben in neuer Version. `Internal/InvoiceWriter61` schreibt in
+Schemareihenfolge, erfindet keine Werte (Ausnahme beim Upgrade: Steuerkategorie S/E, Sprachcode) und
+`EbInterfaceWriter` gibt nur schemagültiges XML aus.
 
 ## Regeln von e-Rechnung.gv.at
 
@@ -128,9 +130,9 @@ dotnet pack src/EbInterface.Net -c Release -o artifacts
 
 ## Stand und nächste Schritte
 
-Erledigt: Versionserkennung (4.3–6.1), XSD-Prüfung 4.3–6.1 mit deutschen Meldungen, Rechnungsmodell und Reader 4.3–6.1, XXE-Schutz, Prüfprofile, Regeln von
+Erledigt: Versionserkennung (4.3–6.1), XSD-Prüfung 4.3–6.1 mit deutschen Meldungen, Rechnungsmodell und Reader 4.3–6.1, Writer 6.1 und Versions-Upgrade auf 6.1, XXE-Schutz, Prüfprofile, Regeln von
 e-Rechnung.gv.at (ERB-01 bis ERB-39) samt Abgleich mit dem Test-Upload und Rechenprüfungen (ERB-26 bis ERB-29, ERB-39), eigene Testdaten, CI.
 
 Als Nächstes, in dieser Reihenfolge:
-1. Writer für 6.1, danach Versions-Upgrade.
+1. ebInterface 7.0, sobald veröffentlicht (Schema, Reader, Writer, EN-16931-Regeln).
 2. Nach Bedarf der Hersteller: fehlende Modellteile (Extension, AdditionalInformation, Classification, Fremdwährung).

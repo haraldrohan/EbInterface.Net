@@ -64,7 +64,7 @@ namespace EbInterface.Model
         /// <summary>Steuerbetrag der Zeile (ab 5.0, optional).</summary>
         public decimal? TaxAmount { get; set; }
 
-        /// <summary>Begründung der Steuerbefreiung (4.3: <c>TaxExemption</c>).</summary>
+        /// <summary>Begründung der Steuerbefreiung (4.3: <c>TaxExemption</c>; ab 5.0: <c>TaxItem/Comment</c> der Zeile).</summary>
         public string? TaxExemptionReason { get; set; }
 
         /// <summary>Code der Steuerbefreiung (4.3: Attribut <c>TaxExemptionCode</c>).</summary>

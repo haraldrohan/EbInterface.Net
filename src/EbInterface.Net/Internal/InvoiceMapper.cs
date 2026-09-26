@@ -245,6 +245,7 @@ namespace EbInterface.Internal
                 line.TaxPercent = Dec(taxItem, "TaxPercent") ?? 0m;
                 line.TaxCategoryCode = TaxCategory(taxItem);
                 line.TaxAmount = Dec(taxItem, "TaxAmount");
+                line.TaxExemptionReason = Text(taxItem, "Comment");
             }
 
             return line;

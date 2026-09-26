@@ -14,8 +14,8 @@ Frühe Entwicklungsphase (`0.1.0-alpha`). Die API kann sich noch ändern.
 | Schema-Prüfung (XSD) | ✅ | ✅ | ✅ | ✅ | geplant |
 | Regeln von e-Rechnung.gv.at | ✅ | ✅ | ✅ | ✅ | geplant |
 | Lesen in ein Modell | ✅ | ✅ | ✅ | ✅ | geplant |
-| Schreiben | – | – | geplant | geplant | geplant |
-| Versions-Upgrade | geplant | geplant | geplant | – | – |
+| Schreiben | – | – | – | ✅ | geplant |
+| Versions-Upgrade auf 6.1 | ✅ | ✅ | ✅ | – | – |
 
 ## Installation
 
@@ -62,6 +62,19 @@ foreach (LineItem line in invoice.AllLineItems)
 Gelesen werden nur schemagültige Dokumente; andernfalls kommt eine `EbInterfaceReadException` mit allen Meldungen
 in `Validation`. Alle Versionen landen im selben Modell. Noch nicht abgebildet sind Erweiterungen (`Extension`),
 Signaturen, `AdditionalInformation`, `Classification`, Fremdwährungsangaben und `PresentationDetails`.
+
+### Rechnung schreiben und auf 6.1 aktualisieren
+
+```csharp
+EbInvoice invoice = EbInterfaceReader.ReadFile("alt-4p3.xml");
+EbInterfaceWriter.WriteFile(invoice, "neu-6p1.xml");   // schreibt immer ebInterface 6.1
+```
+
+Geschrieben wird nur schemagültiges XML; fehlen Pflichtangaben, kommt eine `EbInterfaceWriteException` mit den
+Meldungen der Schema-Prüfung, und es entsteht keine Datei. Beim Upgrade aus 4.3 wird die Steuerkategorie ergänzt
+(„S“ bei einem Steuersatz über 0, sonst „E“); Sonderfälle wie Reverse Charge („AE“) bitte vorher im Modell setzen.
+Dreistellige Sprachcodes (`ger`) werden in zweistellige (`de`) übersetzt. Die Zahlungsart `DirectDebit` gibt es in
+6.1 nicht.
 
 Die Bibliothek prüft vollständig lokal und baut keine Netzwerkverbindungen auf. Den endgültigen Nachweis liefert der
 [Test-Upload von e-Rechnung.gv.at](https://test.erechnung.gv.at/go/test_upload).
