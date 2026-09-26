@@ -5,6 +5,7 @@ Alle wesentlichen Änderungen werden hier dokumentiert. Das Format folgt [Keep a
 ## [Unveröffentlicht]
 
 ### Hinzugefügt
+- Der Writer meldet leere Pflichtangaben und nicht gesetzte Datumswerte als `WRT-01` mit Pfad, statt leere Werte oder „0001-01-01“ zu schreiben; gemeinsame Basisklasse `EbInterfaceException` für Lese- und Schreibfehler; `ValidationResult.Warnings`.
 - `EbInterfaceWriter` schreibt ein `EbInvoice` als ebInterface 6.1 (UTF-8, nur schemagültig, sonst `EbInterfaceWriteException`); zusammen mit dem Reader ergibt das das Versions-Upgrade von 4.3, 5.0 und 6.0 auf 6.1.
 - Rechnungsmodell `EbInvoice` (Namespace `EbInterface.Model`) und `EbInterfaceReader` zum Lesen von 4.3, 5.0, 6.0 und 6.1 in dasselbe Modell; ungültige Dokumente lösen `EbInterfaceReadException` mit dem Prüfergebnis aus.
 - Erkennung der ebInterface-Version 4.3, 5.0, 6.0 und 6.1 anhand des Namespace; ältere Versionen werden als nicht unterstützt gemeldet (`VER-03`).

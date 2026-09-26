@@ -70,10 +70,12 @@ EbInvoice invoice = EbInterfaceReader.ReadFile("alt-4p3.xml");
 EbInterfaceWriter.WriteFile(invoice, "neu-6p1.xml");   // schreibt immer ebInterface 6.1
 ```
 
-Geschrieben wird nur schemagültiges XML; fehlen Pflichtangaben, kommt eine `EbInterfaceWriteException` mit den
-Meldungen der Schema-Prüfung, und es entsteht keine Datei. Beim Upgrade aus 4.3 wird die Steuerkategorie ergänzt
+Geschrieben wird nur schemagültiges XML. Fehlen Pflichtangaben (`WRT-01`, mit Pfad) oder verletzt die Rechnung das
+Schema, kommt eine `EbInterfaceWriteException` mit allen Meldungen, und es entsteht keine Datei. Lese- und
+Schreibfehler haben die gemeinsame Basisklasse `EbInterfaceException`. Beim Upgrade aus 4.3 wird die Steuerkategorie ergänzt
 („S“ bei einem Steuersatz über 0, sonst „E“); Sonderfälle wie Reverse Charge („AE“) bitte vorher im Modell setzen.
-Dreistellige Sprachcodes (`ger`) werden in zweistellige (`de`) übersetzt. Die Zahlungsart `DirectDebit` gibt es in
+Dreistellige Sprachcodes (`ger`) werden in zweistellige (`de`) übersetzt. Sonstige Abgaben auf Zeilenebene haben in 4.3
+keinen eigenen Steuersatz; beim Upgrade gilt der Satz der Zeile. Die Zahlungsart `DirectDebit` gibt es in
 6.1 nicht.
 
 Die Bibliothek prüft vollständig lokal und baut keine Netzwerkverbindungen auf. Den endgültigen Nachweis liefert der

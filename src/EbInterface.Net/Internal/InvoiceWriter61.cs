@@ -136,7 +136,7 @@ namespace EbInterface.Internal
             new XElement(Ns + "Quantity", new XAttribute("Unit", l.Unit), Dec(l.Quantity)),
             new XElement(Ns + "UnitPrice", OptAttr("BaseQuantity", Dec(l.BaseQuantity)), Dec(l.UnitPrice)),
             l.ReductionsAndSurcharges.Count == 0 ? null : new XElement(Ns + "ReductionAndSurchargeListLineItemDetails",
-                l.ReductionsAndSurcharges.Select(WriteLineReductionOrSurcharge)),
+                l.ReductionsAndSurcharges.Select(r => WriteLineReductionOrSurcharge(r, l))),
             l.Delivery == null ? null : WriteDelivery(l.Delivery),
             l.BillersOrderReference == null ? null : WriteLineOrderReference("BillersOrderReference", l.BillersOrderReference),
             l.InvoiceRecipientsOrderReference == null ? null
@@ -154,11 +154,16 @@ namespace EbInterface.Internal
             OptEl("Description", r.Description),
             OptEl("OrderPositionNumber", r.OrderPositionNumber));
 
-        private XElement WriteLineReductionOrSurcharge(ReductionOrSurcharge r) => r.Kind switch
+        /// <summary>
+        /// In 4.3 hat eine sonstige Abgabe auf Zeilenebene keinen eigenen Steuersatz, ab 5.0 ist er Pflicht. Sie gehört
+        /// zur Zeile und wird mit ihr versteuert – daher gelten fehlend Steuersatz und -kategorie der Zeile.
+        /// </summary>
+        private XElement WriteLineReductionOrSurcharge(ReductionOrSurcharge r, LineItem line) => r.Kind switch
         {
             ReductionOrSurchargeKind.Reduction => WriteReductionBase("ReductionListLineItem", r),
             ReductionOrSurchargeKind.Surcharge => WriteReductionBase("SurchargeListLineItem", r),
-            _ => WriteOtherVatableTax("OtherVATableTaxListLineItem", r),
+            _ => WriteOtherVatableTax("OtherVATableTaxListLineItem", r,
+                r.TaxPercent ?? line.TaxPercent, r.TaxCategoryCode ?? line.TaxCategoryCode),
         };
 
         private XElement WriteHeaderReductionOrSurcharge(ReductionOrSurcharge r)
@@ -170,23 +175,26 @@ namespace EbInterface.Internal
             decimal net = r.Amount ?? (r.BaseAmount ?? 0m) * (r.Percentage ?? 0m) / 100m;
             element.Add(new XElement(Ns + "TaxItem",
                 El("TaxableAmount", Dec(net)),
-                TaxPercent(r.TaxPercent ?? 0m, r.TaxCategoryCode, exempt: false)));
+                TaxPercent(r.TaxPercent, r.TaxCategoryCode, exempt: false)));
             return element;
         }
 
         private XElement WriteReductionBase(string name, ReductionOrSurcharge r) => new XElement(Ns + name,
-            El("BaseAmount", Dec(r.BaseAmount ?? 0m)),
+            El("BaseAmount", Dec(r.BaseAmount)),
             OptEl("Percentage", Dec(r.Percentage)),
             OptEl("Amount", Dec(r.Amount)),
             OptEl("Comment", r.Comment));
 
         /// <summary>Ab 5.0 wie ein TaxItem plus TaxID.</summary>
-        private XElement WriteOtherVatableTax(string name, ReductionOrSurcharge r) => new XElement(Ns + name,
-            El("TaxableAmount", Dec(r.BaseAmount ?? 0m)),
-            TaxPercent(r.TaxPercent ?? 0m, r.TaxCategoryCode, exempt: false),
+        private XElement WriteOtherVatableTax(string name, ReductionOrSurcharge r) =>
+            WriteOtherVatableTax(name, r, r.TaxPercent, r.TaxCategoryCode);
+
+        private XElement WriteOtherVatableTax(string name, ReductionOrSurcharge r, decimal? taxPercent, string? taxCategory) => new XElement(Ns + name,
+            El("TaxableAmount", Dec(r.BaseAmount)),
+            TaxPercent(taxPercent, taxCategory, exempt: false),
             OptEl("TaxAmount", Dec(r.Amount)),
             OptEl("Comment", r.Comment),
-            El("TaxID", r.TaxId ?? string.Empty));
+            El("TaxID", r.TaxId));
 
         // --- Steuer -------------------------------------------------------------------------------
 
@@ -206,10 +214,12 @@ namespace EbInterface.Internal
         /// TaxCategoryCode ist ab 5.0 Pflicht. Fehlt er (Quelle 4.3), wird er abgeleitet: „S“ (Normalsatz) bei einem
         /// Steuersatz über 0, sonst „E“ (steuerbefreit). Andere Fälle (z. B. Reverse Charge „AE“) muss der Aufrufer setzen.
         /// </summary>
-        private XElement TaxPercent(decimal percent, string? category, bool exempt) =>
-            new XElement(Ns + "TaxPercent",
-                new XAttribute("TaxCategoryCode", category ?? (percent > 0m && !exempt ? "S" : "E")),
-                Dec(percent));
+        private XElement TaxPercent(decimal? percent, string? category, bool exempt)
+        {
+            XElement element = El("TaxPercent", Dec(percent));
+            element.Add(new XAttribute("TaxCategoryCode", category ?? (percent > 0m && !exempt ? "S" : "E")));
+            return element;
+        }
 
         // --- Zahlung ------------------------------------------------------------------------------
 
@@ -243,7 +253,8 @@ namespace EbInterface.Internal
                 // DirectDebit (nur 4.3) gibt es in 6.1 nicht; NoPayment bleibt NoPayment.
                 DirectDebit _ => throw new NotSupportedException(
                     "Die Zahlungsart DirectDebit gibt es nur in ebInterface 4.3. Für 6.1 bitte SepaDirectDebit verwenden."),
-                _ => new XElement(Ns + "NoPayment"),
+                NoPayment _ => new XElement(Ns + "NoPayment"),
+                _ => throw new NotSupportedException($"Unbekannte Zahlungsart {p.GetType().Name}."),
             });
 
         private XElement WritePaymentConditions(PaymentConditions c) => new XElement(Ns + "PaymentConditions",
@@ -258,7 +269,25 @@ namespace EbInterface.Internal
 
         // --- Hilfen -------------------------------------------------------------------------------
 
-        private static XElement El(string name, string? value) => new XElement(Ns + name, value ?? string.Empty);
+        /// <summary>Pflichtelement. Ist der Wert leer, wird das Element markiert und später als fehlend gemeldet (WRT-01) –
+        /// das Schema lässt leere Texte oft zu, eine leere Rechnungsnummer ist aber nie gewollt.</summary>
+        private static XElement El(string name, string? value)
+        {
+            var element = new XElement(Ns + name, value ?? string.Empty);
+            if (string.IsNullOrWhiteSpace(value)) element.AddAnnotation(MissingValue.Instance);
+            return element;
+        }
+
+        /// <summary>Pfade der Pflichtelemente ohne Wert, z. B. „Invoice/Biller/Address/Town“.</summary>
+        internal static IEnumerable<string> MissingValues(XDocument document) =>
+            document.Descendants()
+                .Where(e => e.Annotation<MissingValue>() != null)
+                .Select(e => string.Join("/", e.AncestorsAndSelf().Reverse().Select(a => a.Name.LocalName)));
+
+        private sealed class MissingValue
+        {
+            internal static readonly MissingValue Instance = new MissingValue();
+        }
 
         private static XElement? OptEl(string name, string? value) =>
             string.IsNullOrEmpty(value) ? null : new XElement(Ns + name, value);
@@ -268,7 +297,9 @@ namespace EbInterface.Internal
 
         private static string? Dec(decimal? value) => value?.ToString(CultureInfo.InvariantCulture);
 
-        private static string? Date(DateTime? value) => value?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        /// <summary>default(DateTime) gilt als nicht gesetzt – sonst entstünde unbemerkt „0001-01-01“.</summary>
+        private static string? Date(DateTime? value) =>
+            value.HasValue && value.Value != default ? value.Value.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) : null;
 
         private static string? Bool(bool? value) => value.HasValue ? XmlConvert.ToString(value.Value) : null;
 

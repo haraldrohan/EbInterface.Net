@@ -39,21 +39,11 @@ namespace EbInterface
     }
 
     /// <summary>Das Dokument konnte nicht gelesen werden, weil es kein gültiges ebInterface ist.</summary>
-    public sealed class EbInterfaceReadException : Exception
+    public sealed class EbInterfaceReadException : EbInterfaceException
     {
         internal EbInterfaceReadException(ValidationResult validation)
-            : base(BuildMessage(validation))
+            : base($"Das Dokument ist kein gültiges ebInterface und kann nicht gelesen werden: {FirstError(validation)}", validation)
         {
-            Validation = validation;
-        }
-
-        /// <summary>Ergebnis der Prüfung mit allen Meldungen.</summary>
-        public ValidationResult Validation { get; }
-
-        private static string BuildMessage(ValidationResult validation)
-        {
-            string first = validation.Errors.GetEnumerator() is var errors && errors.MoveNext() ? errors.Current.ToString() : "unbekannter Fehler";
-            return $"Das Dokument ist kein gültiges ebInterface und kann nicht gelesen werden: {first}";
         }
     }
 }

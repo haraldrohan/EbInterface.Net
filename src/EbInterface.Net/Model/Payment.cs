@@ -7,6 +7,11 @@ namespace EbInterface.Model
     /// <see cref="NoPayment"/>, <see cref="DirectDebit"/>, <see cref="PaymentCard"/>, <see cref="OtherPayment"/>.</summary>
     public abstract class PaymentMethod
     {
+        // Nur die Zahlungsarten dieser Bibliothek – eine eigene Ableitung würde sonst beim Schreiben falsch abgebildet.
+        internal PaymentMethod()
+        {
+        }
+
         /// <summary>Freitext zur Zahlung.</summary>
         public string? Comment { get; set; }
     }

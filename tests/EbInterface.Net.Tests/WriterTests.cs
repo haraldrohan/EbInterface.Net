@@ -94,15 +94,52 @@ namespace EbInterface.Tests
         }
 
         [Fact]
-        public void IncompleteInvoice_ThrowsWithGermanSchemaMessages()
+        public void IncompleteInvoice_ReportsMissingValuesWithPath()
         {
-            var invoice = new EbInvoice(); // ohne Rechnungsnummer, Zeilen, Parteien …
+            var invoice = new EbInvoice(); // ohne Rechnungsnummer, Datum, UID …
 
             var ex = Assert.Throws<EbInterfaceWriteException>(() => WriteToBytes(invoice));
 
             Assert.False(ex.Validation.IsValid);
-            Assert.All(ex.Validation.Errors, e => Assert.StartsWith("XSD-", e.Code));
+            Assert.All(ex.Validation.Errors, e => Assert.Equal("WRT-01", e.Code));
+            Assert.Contains(ex.Validation.Errors, e => e.Message.Contains("Invoice/InvoiceNumber"));
+            Assert.Contains(ex.Validation.Errors, e => e.Message.Contains("Invoice/InvoiceDate"));
             Assert.Contains("wurde nicht geschrieben", ex.Message);
+        }
+
+        [Fact]
+        public void ForgottenDiscountDate_IsNotWrittenAsYearOne()
+        {
+            EbInvoice invoice = EbInterfaceReader.ReadFile(TestFile("6p1/gueltig-bestellnummer.xml"));
+            invoice.PaymentConditions!.Discounts.Add(new Discount { Percentage = 1m });
+
+            var ex = Assert.Throws<EbInterfaceWriteException>(() => WriteToBytes(invoice));
+
+            Assert.Equal("Pflichtangabe fehlt: Invoice/PaymentConditions/Discount/PaymentDate. Bitte im Modell befüllen.",
+                Assert.Single(ex.Validation.Errors).Message);
+        }
+
+        [Fact]
+        public void SchemaViolation_IsReportedAfterMissingValuesAreFilled()
+        {
+            EbInvoice invoice = EbInterfaceReader.ReadFile(TestFile("6p1/gueltig-bestellnummer.xml"));
+            invoice.Currency = "EURO"; // nicht leer, aber zu lang
+
+            var ex = Assert.Throws<EbInterfaceWriteException>(() => WriteToBytes(invoice));
+
+            Assert.Equal("XSD-06", Assert.Single(ex.Validation.Errors).Code);
+        }
+
+        [Fact]
+        public void ReadAndWriteErrors_ShareOneBaseException()
+        {
+            using var notEbInterface = new MemoryStream(Encoding.UTF8.GetBytes("<Order/>"));
+
+            EbInterfaceException read = Assert.ThrowsAny<EbInterfaceException>(() => EbInterfaceReader.Read(notEbInterface));
+            EbInterfaceException write = Assert.ThrowsAny<EbInterfaceException>(() => WriteToBytes(new EbInvoice()));
+
+            Assert.IsType<EbInterfaceReadException>(read);
+            Assert.IsType<EbInterfaceWriteException>(write);
         }
 
         [Fact]

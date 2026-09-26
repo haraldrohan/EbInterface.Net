@@ -21,6 +21,14 @@ Die Meldungen sind deutsch, unabhängig von Sprache und Version der .NET-Laufzei
 | XSD-07 | Schema | Pflichtattribut fehlt. |
 | XSD-08 | Schema | Attribut ist an diesem Element nicht vorgesehen. |
 
+## Schreiben (`EbInterfaceWriter`)
+
+| Code | Bedeutung |
+|---|---|
+| WRT-01 | Pflichtangabe im Modell fehlt (leerer Text oder nicht gesetztes Datum), mit Pfad, z. B. `Invoice/InvoiceNumber`. Das Schema lässt leere Texte oft zu; geschrieben wird trotzdem nicht. |
+
+Nach WRT-01 prüft der Writer das erzeugte XML gegen das Schema; Verstöße kommen mit den XSD-Codes oben.
+
 ## e-Rechnung.gv.at (`ValidationProfile.ERechnungGvAt`)
 
 Quelle: [e-Rechnung.gv.at – ebInterface](https://www.erechnung.gv.at/erb/tec_formats_ebinterface) sowie die Seiten

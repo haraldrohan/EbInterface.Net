@@ -6,6 +6,11 @@ namespace EbInterface.Model
     /// <summary>Gemeinsame Angaben von Rechnungssteller, Rechnungsempfänger und Auftraggeber.</summary>
     public abstract class Party
     {
+        // Nur die Parteien dieser Bibliothek (Biller, InvoiceRecipient, OrderingParty) – eigene Ableitungen könnte der Writer nicht abbilden.
+        internal Party()
+        {
+        }
+
         /// <summary>UID-Nummer; „00000000“, wenn keine vorhanden ist.</summary>
         public string VatIdentificationNumber { get; set; } = string.Empty;
 

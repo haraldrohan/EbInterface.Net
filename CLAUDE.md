@@ -58,7 +58,8 @@ Elementnamen; 4.3 weicht bei Steuer `VATRate`/`TaxExemption`/`VAT/VATItem`, Kont
 Attributen ab). Der Reader liest nur schemagültige Dokumente. Klassen mit `get; set;` und vorbelegten Listen
 (netstandard2.0, VB.NET). Versions-Upgrade = einlesen ins Modell, ausgeben in neuer Version. `Internal/InvoiceWriter61` schreibt in
 Schemareihenfolge, erfindet keine Werte (Ausnahme beim Upgrade: Steuerkategorie S/E, Sprachcode) und
-`EbInterfaceWriter` gibt nur schemagültiges XML aus.
+`EbInterfaceWriter` gibt nur schemagültiges XML aus; leere Pflichtwerte und `default(DateTime)` meldet er als `WRT-01`
+(das Schema lässt leere Texte zu). `Party` und `PaymentMethod` haben interne Konstruktoren – keine fremden Ableitungen.
 
 ## Regeln von e-Rechnung.gv.at
 

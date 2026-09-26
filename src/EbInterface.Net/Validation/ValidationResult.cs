@@ -21,6 +21,9 @@ namespace EbInterface.Validation
         /// <summary>Nur die Fehler.</summary>
         public IEnumerable<ValidationMessage> Errors => Messages.Where(m => m.Severity == ValidationSeverity.Error);
 
+        /// <summary>Nur die Warnungen (z. B. Felder, die e-Rechnung.gv.at nicht auswertet).</summary>
+        public IEnumerable<ValidationMessage> Warnings => Messages.Where(m => m.Severity == ValidationSeverity.Warning);
+
         /// <summary>True, wenn kein Fehler gefunden wurde.</summary>
         public bool IsValid => !Errors.Any();
     }

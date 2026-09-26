@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
@@ -17,14 +18,24 @@ namespace EbInterface
         /// geprüft; es wird nur schemagültiges XML geschrieben. Der Stream wird nicht geschlossen.
         /// Stammt die Rechnung aus einer älteren Version, entsteht damit ein Versions-Upgrade.
         /// </summary>
-        /// <exception cref="EbInterfaceWriteException">Die Rechnung ergibt kein schemagültiges ebInterface 6.1, z. B. weil Pflichtangaben fehlen.</exception>
+        /// <exception cref="EbInterfaceWriteException">Pflichtangaben fehlen (WRT-01) oder die Rechnung ergibt kein schemagültiges ebInterface 6.1 (XSD-xx).</exception>
         /// <exception cref="NotSupportedException">Die Rechnung enthält etwas, das es in 6.1 nicht gibt (Zahlungsart DirectDebit aus 4.3).</exception>
         public static void Write(EbInvoice invoice, Stream output)
         {
             if (invoice is null) throw new ArgumentNullException(nameof(invoice));
             if (output is null) throw new ArgumentNullException(nameof(output));
 
-            byte[] xml = Serialize(InvoiceWriter61.Write(invoice));
+            XDocument document = InvoiceWriter61.Write(invoice);
+
+            // Leere Pflichtwerte zuerst: Das Schema lässt leere Texte oft zu, eine leere Rechnungsnummer ist aber nie gewollt.
+            var missing = InvoiceWriter61.MissingValues(document)
+                .Select(path => new ValidationMessage(ValidationSeverity.Error, "WRT-01",
+                    $"Pflichtangabe fehlt: {path}. Bitte im Modell befüllen."))
+                .ToList();
+            if (missing.Count > 0)
+                throw new EbInterfaceWriteException(new ValidationResult(EbInterfaceVersion.V6p1, missing));
+
+            byte[] xml = Serialize(document);
 
             using (var check = new MemoryStream(xml, writable: false))
             {
@@ -64,21 +75,11 @@ namespace EbInterface
     }
 
     /// <summary>Die Rechnung konnte nicht geschrieben werden, weil sie kein schemagültiges ebInterface ergibt.</summary>
-    public sealed class EbInterfaceWriteException : Exception
+    public sealed class EbInterfaceWriteException : EbInterfaceException
     {
         internal EbInterfaceWriteException(ValidationResult validation)
-            : base(BuildMessage(validation))
+            : base($"Die Rechnung ergibt kein gültiges ebInterface 6.1 und wurde nicht geschrieben: {FirstError(validation)}", validation)
         {
-            Validation = validation;
-        }
-
-        /// <summary>Ergebnis der Schema-Prüfung des erzeugten XML mit allen Meldungen.</summary>
-        public ValidationResult Validation { get; }
-
-        private static string BuildMessage(ValidationResult validation)
-        {
-            string first = validation.Errors.GetEnumerator() is var errors && errors.MoveNext() ? errors.Current.ToString() : "unbekannter Fehler";
-            return $"Die Rechnung ergibt kein gültiges ebInterface 6.1 und wurde nicht geschrieben: {first}";
         }
     }
 }

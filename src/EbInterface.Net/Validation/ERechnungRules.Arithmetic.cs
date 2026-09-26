@@ -96,7 +96,10 @@ namespace EbInterface.Validation
             expected += invoice.RoundingAmount ?? 0m;
 
             int summed = Math.Max(1, lines.Count + invoice.ReductionsAndSurcharges.Count);
-            if (Differs(invoice.PayableAmount, expected, summed))
+            // Ob das Portal sonstige Steuern (OtherTax) einrechnet, ist nicht geklärt – beide Varianten gelten als richtig.
+            decimal otherTaxes = invoice.OtherTaxes.Sum(t => t.TaxAmount);
+            if (Differs(invoice.PayableAmount, expected, summed) &&
+                (otherTaxes == 0m || Differs(invoice.PayableAmount, expected + otherTaxes, summed)))
             {
                 ctx.Error("ERB-27", ctx.Invoice.Element(ctx.Ns + "PayableAmount") ?? ctx.Invoice,
                     $"Der Zahlbetrag {Format(invoice.PayableAmount)} passt nicht zur Summe der Zeilen brutto " +
