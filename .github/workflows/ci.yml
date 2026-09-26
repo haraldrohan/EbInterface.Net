@@ -23,7 +23,7 @@ jobs:
       - run: dotnet test --configuration Release --no-build --verbosity normal
       - run: dotnet pack src/EbInterface.Net --configuration Release --no-build --output artifacts
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: nuget-package
           path: artifacts/*.nupkg
