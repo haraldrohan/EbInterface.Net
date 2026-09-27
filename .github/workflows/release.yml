@@ -1,0 +1,75 @@
+# Veröffentlicht das NuGet-Paket, wenn ein Versions-Tag wie v0.1.0-alpha gepusht wird.
+# Ablauf: bauen und testen, Version prüfen, packen – dann wartet der Job auf die Freigabe im Environment „release“
+# (GitHub fragt nach einer Bestätigung) und lädt erst danach per Trusted Publishing zu nuget.org hoch.
+# Kein API-Schlüssel im Repository: NuGet/login tauscht ein kurzlebiges GitHub-Token gegen einen Schlüssel,
+# der eine Stunde gilt. Die passende Regel ist auf nuget.org unter „Trusted Publishing“ hinterlegt
+# (Owner haraldrohan, Repository EbInterface.Net, Workflow release.yml, Environment release).
+name: Release
+
+on:
+  push:
+    tags: [ 'v*' ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Tag und Paketversion vergleichen
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          version=$(sed -n 's:.*<Version>\(.*\)</Version>.*:\1:p' src/EbInterface.Net/EbInterface.Net.csproj)
+          if [ "$tag" != "$version" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME passt nicht zur Version $version in EbInterface.Net.csproj."
+            exit 1
+          fi
+          if ! grep -q "## \[$version\]" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md hat keinen Abschnitt „## [$version]“."
+            exit 1
+          fi
+
+      - run: dotnet restore
+      - run: dotnet build --configuration Release --no-restore
+      - run: dotnet test --configuration Release --no-build
+      - run: dotnet pack src/EbInterface.Net --configuration Release --no-build --output artifacts
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: nuget-package
+          path: artifacts/*
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: release   # verlangt die Freigabe durch haraldrohan
+    permissions:
+      id-token: write      # für das kurzlebige Token (Trusted Publishing)
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: nuget-package
+          path: artifacts
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Bei nuget.org anmelden (Trusted Publishing)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
+      - name: Paket hochladen
+        run: dotnet nuget push "artifacts/*.nupkg" --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json

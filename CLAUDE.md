@@ -121,6 +121,14 @@ Grundsätze dazu:
 - Keine Wertungen über andere Firmen, Projekte oder Websites in öffentlichen Dateien – auch nicht in
   Commit-Nachrichten. Solche Notizen gehören in ~/.claude/ebinterface-hintergrund.md.
 
+## Veröffentlichung auf NuGet
+
+Über `.github/workflows/release.yml`: Tag `v<Version>` pushen (muss zu `<Version>` in der csproj und einem Abschnitt
+`## [<Version>]` im CHANGELOG passen) → bauen, testen, packen → Freigabe im GitHub-Environment `release` (nur
+haraldrohan, nur Tags `v*`) → Trusted Publishing zu nuget.org (kein API-Schlüssel; Secret `NUGET_USER` = Profilname auf
+nuget.org; Regel auf nuget.org: Owner haraldrohan, Repository EbInterface.Net, Workflow release.yml, Environment
+release). **Erst veröffentlichen, wenn die Forumsfrage an AUSTRIAPRO zu Schema-Lizenz und Paketname beantwortet ist.**
+
 ## Befehle
 
 ```
@@ -133,7 +141,7 @@ dotnet pack src/EbInterface.Net -c Release -o artifacts
 ## Stand und nächste Schritte
 
 Erledigt: Versionserkennung (4.3–6.1), XSD-Prüfung 4.3–6.1 mit deutschen Meldungen, Rechnungsmodell und Reader 4.3–6.1, Writer 6.1 und Versions-Upgrade auf 6.1, XXE-Schutz, Prüfprofile, Regeln von
-e-Rechnung.gv.at (ERB-01 bis ERB-39) samt Abgleich mit dem Test-Upload und Rechenprüfungen (ERB-26 bis ERB-29, ERB-39), eigene Testdaten, CI.
+e-Rechnung.gv.at (ERB-01 bis ERB-40) samt Abgleich mit dem Test-Upload und Rechenprüfungen (ERB-26 bis ERB-29, ERB-39), eigene Testdaten, CI.
 
 Als Nächstes, in dieser Reihenfolge:
 1. ebInterface 7.0, sobald veröffentlicht (Schema, Reader, Writer, EN-16931-Regeln).

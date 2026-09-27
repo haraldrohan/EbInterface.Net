@@ -294,10 +294,15 @@ namespace EbInterface.Validation
 
                         foreach (XElement account in accounts)
                         {
-                            if (string.IsNullOrWhiteSpace(account.Element(ctx.Ns + "IBAN")?.Value))
+                            XElement? iban = account.Element(ctx.Ns + "IBAN");
+                            if (iban == null || string.IsNullOrWhiteSpace(iban.Value))
                             {
                                 ctx.Error("ERB-16", account,
                                     "Das Empfängerkonto braucht eine IBAN; Kontonummer und Bankleitzahl allein genügen nicht.");
+                            }
+                            else
+                            {
+                                CheckIban(ctx, iban);
                             }
                         }
 
@@ -313,6 +318,10 @@ namespace EbInterface.Validation
                                 "Bei SEPADirectDebit fehlen Pflichtangaben: " + string.Join(", ", missing) + ".");
                         }
 
+                        XElement? debitIban = payment.Element(ctx.Ns + "IBAN");
+                        if (debitIban != null && !string.IsNullOrWhiteSpace(debitIban.Value))
+                            CheckIban(ctx, debitIban);
+
                         break;
 
                     case "NoPayment":
@@ -326,6 +335,18 @@ namespace EbInterface.Validation
 
                         break;
                 }
+            }
+        }
+
+        // ERB-40 – nicht auf der Regelseite, vom Test-Upload gemeldet (AF-0097, geprüft 2026-09-27). Leerzeichen und
+        // Kleinbuchstaben nimmt das Portal an, eine falsche Prüfziffer nicht.
+        private static void CheckIban(Context ctx, XElement iban)
+        {
+            string value = Iban.Normalize(iban.Value);
+            if (!Iban.HasValidCheckDigits(value))
+            {
+                ctx.Error("ERB-40", iban,
+                    $"Die IBAN '{iban.Value.Trim()}' ist ungültig: Aufbau oder Prüfziffer stimmen nicht. Bitte die IBAN prüfen.");
             }
         }
 

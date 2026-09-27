@@ -79,6 +79,7 @@ selbst prüfen. Die Bibliothek prüft das Format.
 | ERB-37 | Warnung | `PresentationDetails` wird nicht ausgewertet (4.3). |
 | ERB-38 | Warnung | `VATRate/@TaxCode` wird nicht ausgewertet (4.3). |
 | ERB-39 | Fehler | Steuerbetrag weicht vom Steuersatz auf die aus den Zeilen berechnete Grundlage ab (mehr als 0,10). *Test-Upload: AF-0033.* |
+| ERB-40 | Fehler | IBAN (Empfängerkonto oder SEPA-Lastschrift) mit falschem Aufbau oder falscher Prüfziffer; Leerzeichen und Kleinbuchstaben sind erlaubt. *Test-Upload: AF-0097.* |
 
 ### Auftragsreferenz (ERB-03)
 
@@ -123,7 +124,7 @@ EKG:Referenz bis 50 Zeichen), Bestellpositionsnummern (ERB-05), 999 Zeilen einsc
 BaseQuantity nur bei beiden Divisionen (ERB-21), fehlende FS/FN/FBG werden angenommen (daher Warnung ERB-09),
 `TotalGrossAmount` wird nicht ausgewertet. 5.0 und 6.0 kennen keine Below-The-Line-Zeilen.
 
-**Zusätzlich vom Portal geprüft und hier umgesetzt:** ERB-22 bis ERB-29 und ERB-39.
+**Zusätzlich vom Portal geprüft und hier umgesetzt:** ERB-22 bis ERB-29, ERB-39 und ERB-40 (IBAN, geprüft 27.09.2026: falsche Prüfziffer abgelehnt; Leerzeichen, Kleinbuchstaben und ausländische IBANs angenommen).
 
 **Vom Portal geprüft, offline nicht möglich:**
 - ob eine Einkäufergruppe existiert (AF-0094) und ob Empfängerkennung und interne Referenz eines anderen Empfängers

@@ -438,6 +438,40 @@ namespace EbInterface.Tests
             AssertCode(Validate(document, ERechnung), "ERB-23", expectError);
         }
 
+        // --- ERB-40 IBAN ------------------------------------------------------------------------
+
+        [Theory]
+        [InlineData("AT611904300234573201", false)]      // Portal: angenommen
+        [InlineData("AT61 1904 3002 3457 3201", false)]  // Portal: angenommen (Leerzeichen)
+        [InlineData("at611904300234573201", false)]      // Portal: angenommen (Kleinbuchstaben)
+        [InlineData("DE89370400440532013000", false)]    // Portal: angenommen (ausländische IBAN)
+        [InlineData("AT611904300234573202", true)]       // Portal: AF-0097 (Prüfziffer falsch)
+        [InlineData("AT61190430023457", true)]           // zu kurz
+        [InlineData("AT61-1904-3002-3457-3201", true)]   // unzulässige Zeichen
+        public void Erb40_IbanCheckDigits(string iban, bool expectError)
+        {
+            var document = LoadTestData(OrderNumberFile);
+            document.El("IBAN").Value = iban;
+
+            AssertCode(Validate(document, ERechnung), "ERB-40", expectError);
+        }
+
+        [Fact]
+        public void Erb40_AlsoChecksSepaDirectDebitIban()
+        {
+            var document = LoadTestData(OrderNumberFile);
+            XNamespace ns = document.Root!.Name.Namespace;
+            document.El("UniversalBankTransaction").ReplaceWith(new XElement(ns + "SEPADirectDebit",
+                new XElement(ns + "Type", "B2B"),
+                new XElement(ns + "IBAN", "AT611904300234573202"),
+                new XElement(ns + "BankAccountOwner", "Beispielamt"),
+                new XElement(ns + "CreditorID", "AT12ZZZ00000000001"),
+                new XElement(ns + "MandateReference", "M-1"),
+                new XElement(ns + "DebitCollectionDate", "2026-10-01")));
+
+            AssertCode(Validate(document, ERechnung), "ERB-40", true);
+        }
+
         // --- ERB-30 ff. nicht ausgewertete Felder ------------------------------------------------
 
         [Fact]
