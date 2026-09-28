@@ -17,8 +17,12 @@ Voraussetzung ist .NET 8 oder neuer. Danach steht der Befehl `ebinterface-mcp` z
 ### In Claude Code
 
 ```
-claude mcp add ebinterface -- ebinterface-mcp
+claude mcp add --scope user ebinterface -- ebinterface-mcp
 ```
+
+In der VS-Code-Erweiterung von Claude Code steht der Befehl `claude` meist nicht im Terminal zur Verfügung. Dann den
+Server im Chat über `/mcp` hinzufügen (Befehl `ebinterface-mcp`, Bereich „user“). Neue Server wirken erst in einer
+**neu begonnenen** Unterhaltung; mit `/mcp` oder `/status` lässt sich prüfen, ob `ebinterface` verbunden ist.
 
 ### In Claude Desktop
 
