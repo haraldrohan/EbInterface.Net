@@ -127,7 +127,17 @@ Grundsätze dazu:
 `## [<Version>]` im CHANGELOG passen) → bauen, testen, packen → Freigabe im GitHub-Environment `release` (nur
 haraldrohan, nur Tags `v*`) → Trusted Publishing zu nuget.org (kein API-Schlüssel; Secret `NUGET_USER` = Profilname auf
 nuget.org; Regel auf nuget.org: Owner haraldrohan, Repository EbInterface.Net, Workflow release.yml, Environment
-release). **Erst veröffentlichen, wenn die Forumsfrage an AUSTRIAPRO zu Schema-Lizenz und Paketname beantwortet ist.**
+release). Die Regel muss beide Pakete erlauben (`EbInterface.Net` und `EbInterface.Net.Mcp`). **Erst veröffentlichen, wenn die Forumsfrage an AUSTRIAPRO zu Schema-Lizenz und Paketname beantwortet ist.**
+
+## MCP-Server (`src/EbInterface.Net.Mcp`)
+
+Zweites Paket im selben Repository (net8.0, .NET-Tool `ebinterface-mcp`, SDK `ModelContextProtocol`), gleiche Version
+wie die Bibliothek (`<Version>` in Directory.Build.props). Werkzeuge in `InvoiceTools.cs`: Dateipfade statt XML-Inhalt,
+kompakte deutsche Textantworten, IBANs gekürzt. `explain_code` liest `docs/pruefregeln.md` (eingebettet) – neue
+Codes dort eintragen, dann kennt sie auch der Server. Protokolltest startet den echten Server über stdio.
+
+**Smart App Control** (auf Haralds Rechner aktiv) blockiert zeitweise frisch gebaute, unsignierte Test-DLLs
+(„Anwendungssteuerungsrichtlinie hat diese Datei blockiert“). Kein Code-Fehler; die vollständige Testsuite läuft in der CI.
 
 ## Befehle
 

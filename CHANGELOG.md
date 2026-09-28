@@ -5,6 +5,7 @@ Alle wesentlichen Änderungen werden hier dokumentiert. Das Format folgt [Keep a
 ## [Unveröffentlicht]
 
 ### Hinzugefügt
+- Zusatzpaket `EbInterface.Net.Mcp`: lokaler MCP-Server (.NET-Tool `ebinterface-mcp`) mit den Werkzeugen `validate_invoice`, `read_invoice`, `upgrade_invoice` und `explain_code`, z. B. für Claude Code und Claude Desktop.
 - Prüfung der IBAN-Prüfziffer (`ERB-40`) wie im Test-Upload von e-Rechnung.gv.at.
 - Der Writer meldet leere Pflichtangaben und nicht gesetzte Datumswerte als `WRT-01` mit Pfad, statt leere Werte oder „0001-01-01“ zu schreiben; gemeinsame Basisklasse `EbInterfaceException` für Lese- und Schreibfehler; `ValidationResult.Warnings`.
 - `EbInterfaceWriter` schreibt ein `EbInvoice` als ebInterface 6.1 (UTF-8, nur schemagültig, sonst `EbInterfaceWriteException`); zusammen mit dem Reader ergibt das das Versions-Upgrade von 4.3, 5.0 und 6.0 auf 6.1.

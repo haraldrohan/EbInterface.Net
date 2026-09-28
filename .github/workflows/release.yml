@@ -29,9 +29,9 @@ jobs:
       - name: Tag und Paketversion vergleichen
         run: |
           tag="${GITHUB_REF_NAME#v}"
-          version=$(sed -n 's:.*<Version>\(.*\)</Version>.*:\1:p' src/EbInterface.Net/EbInterface.Net.csproj)
+          version=$(sed -n 's:.*<Version>\(.*\)</Version>.*:\1:p' Directory.Build.props)
           if [ "$tag" != "$version" ]; then
-            echo "::error::Tag $GITHUB_REF_NAME passt nicht zur Version $version in EbInterface.Net.csproj."
+            echo "::error::Tag $GITHUB_REF_NAME passt nicht zur Version $version in Directory.Build.props."
             exit 1
           fi
           if ! grep -q "## \[$version\]" CHANGELOG.md; then
@@ -43,6 +43,7 @@ jobs:
       - run: dotnet build --configuration Release --no-restore
       - run: dotnet test --configuration Release --no-build
       - run: dotnet pack src/EbInterface.Net --configuration Release --no-build --output artifacts
+      - run: dotnet pack src/EbInterface.Net.Mcp --configuration Release --no-build --output artifacts
 
       - uses: actions/upload-artifact@v7
         with:

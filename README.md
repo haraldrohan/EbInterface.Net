@@ -85,6 +85,13 @@ Dreistellige Sprachcodes (`ger`) werden in zweistellige (`de`) übersetzt. Sonst
 keinen eigenen Steuersatz; beim Upgrade gilt der Satz der Zeile. Die Zahlungsart `DirectDebit` gibt es in
 6.1 nicht.
 
+### Aus Claude heraus (MCP-Server)
+
+Das Zusatzpaket `EbInterface.Net.Mcp` stellt Prüfung, Lesen und Upgrade als lokalen MCP-Server bereit, z. B. für
+Claude Code oder Claude Desktop: `dotnet tool install -g EbInterface.Net.Mcp`, dann
+`claude mcp add ebinterface -- ebinterface-mcp`. Details und Hinweise zum Datenschutz stehen im
+[README des MCP-Pakets](https://github.com/haraldrohan/EbInterface.Net/blob/main/src/EbInterface.Net.Mcp/README.md).
+
 Die Bibliothek prüft vollständig lokal und baut keine Netzwerkverbindungen auf. Den endgültigen Nachweis liefert der
 [Test-Upload von e-Rechnung.gv.at](https://test.erechnung.gv.at/go/test_upload).
 

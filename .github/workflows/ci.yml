@@ -22,6 +22,7 @@ jobs:
       - run: dotnet build --configuration Release --no-restore
       - run: dotnet test --configuration Release --no-build --verbosity normal
       - run: dotnet pack src/EbInterface.Net --configuration Release --no-build --output artifacts
+      - run: dotnet pack src/EbInterface.Net.Mcp --configuration Release --no-build --output artifacts
 
       - uses: actions/upload-artifact@v7
         with:

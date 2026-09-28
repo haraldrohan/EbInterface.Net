@@ -7,7 +7,6 @@
     <AssemblyName>EbInterface.Net</AssemblyName>
 
     <PackageId>EbInterface.Net</PackageId>
-    <Version>0.1.0-alpha</Version>
     <Description>Unabhängige .NET-Implementierung des österreichischen E-Rechnungsstandards ebInterface: Lesen, Schreiben und Prüfen inkl. der Regeln von e-Rechnung.gv.at. Nicht offiziell von AUSTRIAPRO herausgegeben.</Description>
     <PackageTags>ebinterface;e-invoice;e-rechnung;einvoicing;austria;oesterreich;en16931;xml</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

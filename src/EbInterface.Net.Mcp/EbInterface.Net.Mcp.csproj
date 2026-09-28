@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>EbInterface.Mcp</RootNamespace>
+    <AssemblyName>EbInterface.Net.Mcp</AssemblyName>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <!-- Als .NET-Tool verpackt: dotnet tool install -g EbInterface.Net.Mcp → Befehl ebinterface-mcp -->
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>ebinterface-mcp</ToolCommandName>
+    <PackageId>EbInterface.Net.Mcp</PackageId>
+    <Description>Lokaler MCP-Server (Model Context Protocol) für EbInterface.Net: ebInterface-Rechnungen prüfen, lesen und auf 6.1 aktualisieren – z. B. aus Claude heraus. Läuft vollständig lokal. Nicht offiziell von AUSTRIAPRO herausgegeben.</Description>
+    <PackageTags>ebinterface;e-rechnung;mcp;model-context-protocol;claude;dotnet-tool</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>Änderungen: https://github.com/haraldrohan/EbInterface.Net/blob/main/CHANGELOG.md</PackageReleaseNotes>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EbInterface.Net\EbInterface.Net.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ModelContextProtocol" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.12" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Einzige Quelle für die Erklärungen der Fehlercodes -->
+    <EmbeddedResource Include="../../docs/pruefregeln.md" LogicalName="EbInterface.Mcp.pruefregeln.md" />
+    <None Include="README.md" Pack="true" PackagePath="/" />
+    <None Include="../../THIRD-PARTY-NOTICES.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+
+</Project>
