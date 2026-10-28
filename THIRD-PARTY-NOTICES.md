@@ -13,6 +13,10 @@ Dieses Projekt enthält bzw. verwendet Material Dritter, das **nicht** unter der
   und nicht mit dem Paket ausgeliefert.
 - **Lizenz:** Das Quell-Repository enthält keine eigene Lizenzdatei. ebInterface wird von AUSTRIAPRO zur kostenlosen
   Implementierung bereitgestellt. Alle Rechte an den Schemas verbleiben bei AUSTRIAPRO.
+- **Stand der Klärung (Oktober 2026):** Auf eine Anfrage im ebInterface-Forum wurde mitgeteilt, dass eine rechtlich
+  abgeklärte Antwort zur Weitergabe der Schemas noch aussteht und der zuständige Arbeitskreis das Thema klären wird.
+  Die Schemas werden bis dahin unverändert und mit dieser Herkunftsangabe weitergegeben. Legt AUSTRIAPRO eine Lizenz
+  oder Bedingungen fest, übernimmt dieses Projekt sie.
 
 ## XML-Signatur-Schema des W3C
 
