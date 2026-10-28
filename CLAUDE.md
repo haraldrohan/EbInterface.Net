@@ -152,6 +152,11 @@ dotnet pack src/EbInterface.Net -c Release -o artifacts
 
 Erledigt: Versionserkennung (4.3–6.1), XSD-Prüfung 4.3–6.1 mit deutschen Meldungen, Rechnungsmodell und Reader 4.3–6.1, Writer 6.1 und Versions-Upgrade auf 6.1, XXE-Schutz, Prüfprofile, Regeln von
 e-Rechnung.gv.at (ERB-01 bis ERB-40) samt Abgleich mit dem Test-Upload und Rechenprüfungen (ERB-26 bis ERB-29, ERB-39), eigene Testdaten, CI.
+MCP-Server `EbInterface.Net.Mcp`. **0.1.0-alpha am 2026-10-28 auf nuget.org veröffentlicht** (beide Pakete, GitHub-Release als
+Vorabversion).
+
+Kleinigkeiten für 0.1.1: Der MCP-Server meldet als Version die Assembly-Version „0.1.0.0“ statt „0.1.0-alpha“
+(InformationalVersion verwenden).
 
 Als Nächstes, in dieser Reihenfolge:
 1. ebInterface 7.0, sobald veröffentlicht (Schema, Reader, Writer, EN-16931-Regeln).
