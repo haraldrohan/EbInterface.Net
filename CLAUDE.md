@@ -127,9 +127,7 @@ Grundsätze dazu:
 `## [<Version>]` im CHANGELOG passen) → bauen, testen, packen → Freigabe im GitHub-Environment `release` (nur
 haraldrohan, nur Tags `v*`) → Trusted Publishing zu nuget.org (kein API-Schlüssel; Secret `NUGET_USER` = Profilname auf
 nuget.org; Regel auf nuget.org: Owner haraldrohan, Repository EbInterface.Net, Workflow release.yml, Environment
-release). Die Regel muss beide Pakete erlauben (`EbInterface.Net` und `EbInterface.Net.Mcp`). Forumsantwort (Oktober 2026): keine juristisch abgeklärte Antwort, der Arbeitskreis klärt die Weitergabe; zum Namen keine
-Aussage. Harald hat die Vorabversion 0.1.0-alpha trotzdem freigegeben. Stand in THIRD-PARTY-NOTICES.md; eine spätere Lizenz
-oder Bedingungen von AUSTRIAPRO übernehmen.
+release). Die Regel muss beide Pakete erlauben (`EbInterface.Net` und `EbInterface.Net.Mcp`).
 
 ## MCP-Server (`src/EbInterface.Net.Mcp`)
 
