@@ -10,6 +10,13 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    ignore:
+      # Große Sprünge der .NET-Laufzeitpakete erst übernehmen, wenn das MCP-SDK (ModelContextProtocol) dazu passt –
+      # Hosting 11 mit MCP-SDK 2.4 (gebaut gegen System.Text.Json 10) brach den MCP-Server (PR #11, November 2026).
+      - dependency-name: "Microsoft.Extensions.*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "System.*"
+        update-types: ["version-update:semver-major"]
     groups:
       test-tools:
         patterns: ["*"]
